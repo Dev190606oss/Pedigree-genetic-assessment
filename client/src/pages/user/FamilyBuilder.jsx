@@ -9,6 +9,13 @@ import { Alert } from '../../components/common/Alert';
 import { Stepper } from '../../components/common/Stepper';
 import { PedigreeGraph } from '../../features/pedigree/PedigreeGraph';
 import {
+  RELATIONSHIP_GROUPS,
+  RELATIONSHIP_DEFINITIONS,
+  getRelationshipDefinition,
+  getInverseRelationship,
+  getRelationshipPreviewText
+} from '../../utils/relationshipHelper';
+import {
   Users,
   GitMerge,
   Activity,
@@ -67,6 +74,8 @@ export const FamilyBuilder = () => {
   const [relFrom, setRelFrom] = useState('');
   const [relTo, setRelTo] = useState('');
   const [relType, setRelType] = useState('PARENT_CHILD');
+  const [relSearch, setRelSearch] = useState('');
+  const [relError, setRelError] = useState('');
 
   const [condMemberId, setCondMemberId] = useState('');
   const [condId, setCondId] = useState('');
@@ -148,8 +157,14 @@ export const FamilyBuilder = () => {
   // Add Relationship
   const handleAddRelationship = async (e) => {
     e.preventDefault();
+    setRelError('');
+    if (!relFrom || !relTo) {
+      setRelError('Please select both family members.');
+      return;
+    }
     if (relFrom === relTo) {
-      return alert('A member cannot have a relationship with themselves.');
+      setRelError('A member cannot have a relationship with themselves.');
+      return;
     }
     try {
       await api.post(`/families/${id}/relationships`, {
@@ -160,9 +175,11 @@ export const FamilyBuilder = () => {
       setShowRelModal(false);
       setRelFrom('');
       setRelTo('');
+      setRelSearch('');
+      setRelError('');
       fetchFamilyDetails();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to add relationship.');
+      setRelError(err.response?.data?.error || 'Failed to add relationship.');
     }
   };
 
@@ -385,37 +402,54 @@ export const FamilyBuilder = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold text-slate-900">Biological & Partnership Relationships ({relationships.length})</h2>
-              <p className="text-xs text-slate-500">Connect parents, children, and reproductive partners</p>
+              <h2 className="text-base font-bold text-slate-900">Family Relationships ({relationships.length})</h2>
+              <p className="text-xs text-slate-500">Connect immediate, extended, step, and adoptive family members</p>
             </div>
-            <Button onClick={() => setShowRelModal(true)} size="sm" disabled={members.length < 2}>
-              <Plus className="w-4 h-4 mr-1" /> Add Relationship
+            <Button onClick={() => { setRelError(''); setShowRelModal(true); }} size="sm" disabled={members.length < 2}>
+              <Plus className="w-4 h-4 mr-1" /> Add Family Relationship
             </Button>
           </div>
 
           {relationships.length === 0 ? (
             <Card className="p-8 text-center space-y-2">
               <p className="text-sm text-slate-600">No relationships established yet.</p>
-              <p className="text-xs text-slate-400">Add parent-child links or marriage/partnerships to generate the pedigree graph.</p>
+              <p className="text-xs text-slate-400">Add relationships between family members to construct the pedigree tree.</p>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {relationships.map(rel => {
-                const fromName = rel.fromMemberId?.name || 'Member';
-                const toName = rel.toMemberId?.name || 'Member';
+                const fromMember = rel.fromMemberId;
+                const toMember = rel.toMemberId;
+                const fromName = fromMember?.name || 'Member';
+                const toName = toMember?.name || 'Member';
+                const def = getRelationshipDefinition(rel.metadata?.specificType || rel.type);
+                const inverseType = rel.metadata?.inverseType || getInverseRelationship(def.code, fromMember?.sex, toMember?.sex);
+                const inverseDef = getRelationshipDefinition(inverseType);
 
                 return (
-                  <Card key={rel._id} className="p-3.5 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="font-bold text-slate-800">{fromName}</span>
-                      <span className="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono">
-                        {rel.type === 'PARENT_CHILD' ? 'Parent of →' : rel.type === 'SPOUSE' ? 'Married to ⚭' : 'Partner with ⚯'}
-                      </span>
-                      <span className="font-bold text-slate-800">{toName}</span>
+                  <Card key={rel._id} className="p-3.5 flex items-center justify-between hover:border-slate-300 transition-colors">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="font-bold text-slate-800">{fromName}</span>
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full border font-medium ${def.badgeClass || 'bg-slate-50 text-slate-700 border-slate-200'}`}>
+                          {def.label}
+                        </span>
+                        <span className="text-slate-400">→</span>
+                        <span className="font-bold text-slate-800">{toName}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                        <span>Reverse: {toName} is the {inverseDef.label.toLowerCase()} of {fromName}</span>
+                        {def.group && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
+                            {def.group}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <button
                       onClick={() => handleDeleteRelationship(rel._id)}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors"
+                      title="Remove relationship"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -502,43 +536,43 @@ export const FamilyBuilder = () => {
       {currentStep === 4 && (
         <Card className="p-8 space-y-6 max-w-2xl mx-auto">
           <div className="text-center space-y-2">
-            <h2 className="text-xl font-bold text-slate-900">Pre-Assessment Readiness Checklist</h2>
-            <p className="text-xs text-slate-500">
-              Review your recorded family dataset before initiating the AIES deterministic rule evaluation
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Pre-Assessment Readiness Checklist</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Review your recorded family dataset before initiating the clinical health assessment
             </p>
           </div>
 
-          <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 text-xs">
-            <div className="flex items-center justify-between py-2 border-b border-slate-200/60">
-              <span className="text-slate-600">Designated Proband (Index Patient)</span>
+          <div className="space-y-3 bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 text-xs">
+            <div className="flex items-center justify-between py-2 border-b border-slate-200/60 dark:border-slate-700">
+              <span className="text-slate-600 dark:text-slate-400">Designated Proband (Index Patient)</span>
               {proband ? (
-                <span className="font-bold text-emerald-600 flex items-center gap-1">
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 className="w-4 h-4" /> {proband.name}
                 </span>
               ) : (
-                <span className="font-bold text-rose-600 flex items-center gap-1">
+                <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" /> Missing Proband
                 </span>
               )}
             </div>
 
-            <div className="flex items-center justify-between py-2 border-b border-slate-200/60">
-              <span className="text-slate-600">Total Family Members</span>
-              <span className="font-bold text-slate-800">{members.length} member(s)</span>
+            <div className="flex items-center justify-between py-2 border-b border-slate-200/60 dark:border-slate-700">
+              <span className="text-slate-600 dark:text-slate-400">Total Family Members</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">{members.length} member(s)</span>
             </div>
 
-            <div className="flex items-center justify-between py-2 border-b border-slate-200/60">
-              <span className="text-slate-600">Relationships Documented</span>
-              <span className="font-bold text-slate-800">{relationships.length} relationship(s)</span>
+            <div className="flex items-center justify-between py-2 border-b border-slate-200/60 dark:border-slate-700">
+              <span className="text-slate-600 dark:text-slate-400">Relationships Documented</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">{relationships.length} relationship(s)</span>
             </div>
 
             <div className="flex items-center justify-between py-2">
-              <span className="text-slate-600">Hereditary Conditions Linked</span>
-              <span className="font-bold text-slate-800">{conditions.length} condition record(s)</span>
+              <span className="text-slate-600 dark:text-slate-400">Hereditary Conditions Linked</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">{conditions.length} condition record(s)</span>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button variant="secondary" onClick={() => handleStepChange(3)} size="sm">
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
@@ -554,7 +588,7 @@ export const FamilyBuilder = () => {
                 disabled={members.length === 0}
                 className="w-full sm:w-auto shadow-md shadow-brand-600/20"
               >
-                <Sparkles className="w-4 h-4 mr-1.5" /> Run AIES Assessment
+                <Sparkles className="w-4 h-4 mr-1.5" /> Run Health Assessment
               </Button>
             </div>
           </div>
@@ -638,27 +672,27 @@ export const FamilyBuilder = () => {
               <Card className="p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
                       Triggered Decision-Support Rules ({assessmentResult.triggeredRules?.length || 0})
                     </h3>
-                    <p className="text-xs text-slate-500">Transparent expert system inference audit</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Transparent clinical rule evaluation audit</p>
                   </div>
-                  <Badge variant="brand" size="sm">Deterministic AIES</Badge>
+                  <Badge variant="brand" size="sm">Evidence-Based Assessment</Badge>
                 </div>
 
                 <div className="space-y-3">
                   {assessmentResult.triggeredRules?.map((tr, idx) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+                    <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-2 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 text-sm">
+                        <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
                           [{tr.ruleCode}] {tr.name}
                         </span>
-                        <span className="text-[11px] font-semibold text-slate-500">
+                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                           Priority: {tr.priority}
                         </span>
                       </div>
-                      <p className="text-slate-600 leading-relaxed">
-                        <strong className="text-slate-800">Reasoning:</strong> {tr.explanation}
+                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <strong className="text-slate-800 dark:text-slate-200">Reasoning:</strong> {tr.explanation}
                       </p>
                     </div>
                   ))}
@@ -667,22 +701,22 @@ export const FamilyBuilder = () => {
 
               {/* Guidance Recommendations */}
               <Card className="p-6 space-y-4">
-                <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-3">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm border-b border-slate-100 dark:border-slate-800 pb-3">
                   Educational Guidance & Recommended Next Steps
                 </h3>
-                <ul className="space-y-2 text-xs text-slate-700">
+                <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
                   {assessmentResult.guidance?.map((g, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400 flex-shrink-0 mt-0.5" />
                       <span>{g}</span>
                     </li>
                   ))}
                 </ul>
               </Card>
 
-              {/* Academic Disclaimer */}
-              <div className="p-4 bg-slate-100 rounded-xl text-[11px] text-slate-500 border border-slate-200 leading-relaxed">
-                <strong>Disclaimer:</strong> {assessmentResult.disclaimer}
+              {/* Health Notice Disclaimer */}
+              <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl text-[11px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 leading-relaxed">
+                <strong>Important Health Notice:</strong> {assessmentResult.disclaimer}
               </div>
             </>
           )}
@@ -790,17 +824,24 @@ export const FamilyBuilder = () => {
       {/* --- ADD RELATIONSHIP MODAL --- */}
       <Modal
         isOpen={showRelModal}
-        onClose={() => setShowRelModal(false)}
-        title="Add Biological or Partner Relationship"
+        onClose={() => { setShowRelModal(false); setRelError(''); setRelSearch(''); }}
+        title="Add Family Relationship"
       >
         <form onSubmit={handleAddRelationship} className="space-y-4">
+          {relError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+              <span>{relError}</span>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">From Member *</label>
             <select
               required
               value={relFrom}
-              onChange={(e) => setRelFrom(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              onChange={(e) => { setRelFrom(e.target.value); setRelError(''); }}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
             >
               <option value="">Select Member...</option>
               {members.map(m => (
@@ -810,16 +851,42 @@ export const FamilyBuilder = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Relationship Type *</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-700">Relationship Type *</label>
+              <span className="text-[11px] text-slate-400">51 pedigree options</span>
+            </div>
+            <div className="mb-2">
+              <input
+                type="text"
+                placeholder="Search relationships (e.g. maternal, uncle, step, cousin)..."
+                value={relSearch}
+                onChange={(e) => setRelSearch(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 placeholder:text-slate-400"
+              />
+            </div>
             <select
               value={relType}
-              onChange={(e) => setRelType(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              onChange={(e) => { setRelType(e.target.value); setRelError(''); }}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
             >
-              <option value="PARENT_CHILD">Parent of (Biological Child)</option>
-              <option value="SPOUSE">Spouse / Married</option>
-              <option value="PARTNER">Reproductive Partner</option>
-              <option value="SIBLING">Sibling</option>
+              {Object.values(RELATIONSHIP_GROUPS).map(groupName => {
+                const groupOptions = RELATIONSHIP_DEFINITIONS.filter(def => {
+                  if (def.group !== groupName) return false;
+                  if (!relSearch.trim()) return true;
+                  const q = relSearch.toLowerCase();
+                  return def.label.toLowerCase().includes(q) || def.code.toLowerCase().includes(q);
+                });
+                if (groupOptions.length === 0) return null;
+                return (
+                  <optgroup key={groupName} label={groupName}>
+                    {groupOptions.map(def => (
+                      <option key={def.code} value={def.code}>
+                        {def.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
             </select>
           </div>
 
@@ -828,8 +895,8 @@ export const FamilyBuilder = () => {
             <select
               required
               value={relTo}
-              onChange={(e) => setRelTo(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              onChange={(e) => { setRelTo(e.target.value); setRelError(''); }}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
             >
               <option value="">Select Target Member...</option>
               {members.filter(m => m._id !== relFrom).map(m => (
@@ -838,8 +905,41 @@ export const FamilyBuilder = () => {
             </select>
           </div>
 
+          {/* Dynamic Preview Helper Text */}
+          {relFrom && relTo && (
+            <div className="p-3 bg-brand-50 border border-brand-200 rounded-xl text-xs text-brand-900 flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-brand-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-semibold text-brand-950">
+                  {getRelationshipPreviewText(
+                    relType,
+                    members.find(m => m._id === relFrom)?.name || 'From Member',
+                    members.find(m => m._id === relTo)?.name || 'To Member'
+                  )}
+                </p>
+                <p className="text-[11px] text-brand-700">
+                  Reverse:{' '}
+                  {members.find(m => m._id === relTo)?.name} is the{' '}
+                  {getRelationshipDefinition(
+                    getInverseRelationship(
+                      relType,
+                      members.find(m => m._id === relFrom)?.sex,
+                      members.find(m => m._id === relTo)?.sex
+                    )
+                  ).label.toLowerCase()}{' '}
+                  of {members.find(m => m._id === relFrom)?.name}.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" size="sm" onClick={() => setShowRelModal(false)}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => { setShowRelModal(false); setRelError(''); setRelSearch(''); }}
+            >
               Cancel
             </Button>
             <Button type="submit" size="sm">

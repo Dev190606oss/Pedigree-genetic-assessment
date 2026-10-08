@@ -62,7 +62,7 @@ app.get('*', (req, res, next) => {
 // Centralized error handling
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 let server = null;
 if (process.env.NODE_ENV !== 'test') {

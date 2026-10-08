@@ -1,7 +1,7 @@
 {
   "name": "pedigree-server",
   "version": "1.0.0",
-  "description": "PEDIGREE Backend API & AIES Rule Engine",
+  "description": "PEDIGREE Backend API & Clinical Rule Engine",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

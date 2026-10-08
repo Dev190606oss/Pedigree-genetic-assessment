@@ -4,7 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Alert } from '../../components/common/Alert';
-import { Dna, Lock, Mail, ArrowRight, UserCheck, Stethoscope, ShieldCheck } from 'lucide-react';
+import { PasswordInput } from '../../components/common/PasswordInput';
+import { getFriendlyErrorMessage } from '../../utils/errorHandler';
+import { Dna, Mail, ArrowRight, UserCheck, Stethoscope, ShieldCheck } from 'lucide-react';
 
 export const UserLogin = () => {
   const [email, setEmail] = useState('');
@@ -23,10 +25,10 @@ export const UserLogin = () => {
     setLoading(true);
 
     try {
-      const user = await login(email, password, 'USER');
+      await login(email, password, 'USER');
       navigate('/user/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Login failed. Please check credentials.');
+      setError(getFriendlyErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -45,44 +47,39 @@ export const UserLogin = () => {
           <div className="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center mx-auto shadow-md shadow-brand-600/20">
             <Dna className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900">Patient Portal Sign In</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Patient Portal Sign In</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Enter your credentials to access your family cases & assessments
           </p>
         </div>
 
-        <Card className="p-8 shadow-lg border-slate-200">
+        <Card className="p-8 shadow-lg border-slate-200 dark:border-slate-800">
           {error && <Alert type="danger" className="mb-4">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-3 pointer-events-none" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
-                />
-              </div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
             </div>
 
             <Button type="submit" loading={loading} className="w-full mt-2" size="md">
@@ -91,31 +88,31 @@ export const UserLogin = () => {
           </form>
 
           {/* Quick Demo Fill Button */}
-          <div className="mt-4 pt-4 border-t border-slate-100 text-center">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
             <button
               type="button"
               onClick={handleQuickFill}
-              className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors"
+              className="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 dark:bg-brand-950/50 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-lg transition-colors"
             >
               <UserCheck className="w-3.5 h-3.5" /> Quick-Fill Demo Patient Account
             </button>
           </div>
 
-          <div className="mt-6 text-center text-xs text-slate-500">
+          <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
             Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-700">
+            <Link to="/register" className="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300">
               Create an account
             </Link>
           </div>
         </Card>
 
         {/* Portal Switcher Links */}
-        <div className="flex items-center justify-center gap-4 text-xs text-slate-500">
-          <Link to="/counselor/login" className="flex items-center gap-1 hover:text-sky-600">
+        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <Link to="/counselor/login" className="flex items-center gap-1 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
             <Stethoscope className="w-3.5 h-3.5" /> Counselor Portal
           </Link>
           <span>•</span>
-          <Link to="/admin/login" className="flex items-center gap-1 hover:text-purple-600">
+          <Link to="/admin/login" className="flex items-center gap-1 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
             <ShieldCheck className="w-3.5 h-3.5" /> Admin Portal
           </Link>
         </div>

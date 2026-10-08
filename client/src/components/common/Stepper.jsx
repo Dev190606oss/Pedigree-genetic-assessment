@@ -22,8 +22,8 @@ export const Stepper = ({ steps, currentStep, onStepClick }) => {
                     isCompleted
                       ? 'bg-brand-600 text-white shadow-sm'
                       : isCurrent
-                      ? 'bg-brand-50 text-brand-700 border-2 border-brand-600 ring-4 ring-brand-50'
-                      : 'bg-slate-100 text-slate-400 border border-slate-200'
+                      ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border-2 border-brand-600 ring-4 ring-brand-50 dark:ring-brand-950/40'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   {isCompleted ? <Check className="w-4 h-4 stroke-[2.5]" /> : index + 1}
@@ -31,10 +31,10 @@ export const Stepper = ({ steps, currentStep, onStepClick }) => {
                 <span
                   className={`mt-2 text-xs font-medium ${
                     isCurrent
-                      ? 'text-brand-700 font-semibold'
+                      ? 'text-brand-700 dark:text-brand-400 font-semibold'
                       : isCompleted
-                      ? 'text-slate-700'
-                      : 'text-slate-400'
+                      ? 'text-slate-700 dark:text-slate-300'
+                      : 'text-slate-400 dark:text-slate-500'
                   }`}
                 >
                   {step.title}
@@ -44,7 +44,7 @@ export const Stepper = ({ steps, currentStep, onStepClick }) => {
               {index < steps.length - 1 && (
                 <div
                   className={`flex-1 h-0.5 mx-2 -mt-5 transition-all duration-200 ${
-                    index < currentStep ? 'bg-brand-500' : 'bg-slate-200'
+                    index < currentStep ? 'bg-brand-500' : 'bg-slate-200 dark:bg-slate-700'
                   }`}
                 />
               )}

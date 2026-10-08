@@ -107,7 +107,7 @@ export const CaseReview = () => {
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-slate-400">Loading case file...</div>;
+    return <div className="p-12 text-center text-slate-400 dark:text-slate-500">Loading case file...</div>;
   }
 
   const family = caseData?.family;
@@ -123,25 +123,25 @@ export const CaseReview = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Link to="/counselor/cases" className="text-slate-400 hover:text-slate-600">
+            <Link to="/counselor/cases" className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-xl font-extrabold text-slate-900">{family?.name}</h1>
+            <h1 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">{family?.name}</h1>
             <Badge variant="info" size="sm">Case #{family?._id.slice(-6)}</Badge>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Patient: <span className="font-semibold text-slate-800">{family?.ownerId?.name}</span> ({family?.ownerId?.email})
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Patient: <span className="font-semibold text-slate-800 dark:text-slate-200">{family?.ownerId?.name}</span> ({family?.ownerId?.email})
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Status Selector */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500 font-medium">Status:</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Status:</span>
             <select
               value={status}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
               <option value="PENDING">PENDING</option>
               <option value="IN_REVIEW">IN_REVIEW</option>
@@ -164,13 +164,13 @@ export const CaseReview = () => {
       {error && <Alert type="danger">{error}</Alert>}
 
       {/* Interactive Pedigree Review */}
-      <Card className="p-4 space-y-3 border-sky-100 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+      <Card className="p-4 space-y-3 border-sky-100 dark:border-slate-800 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-slate-900">Pedigree Visual Review</h2>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Pedigree Visual Review</h2>
             <Badge variant="brand" size="sm">{members.length} Members</Badge>
           </div>
-          <span className="text-[11px] text-slate-400">Click symbols to inspect member records</span>
+          <span className="text-[11px] text-slate-400 dark:text-slate-500">Click symbols to inspect member records</span>
         </div>
 
         <PedigreeGraph
@@ -182,11 +182,11 @@ export const CaseReview = () => {
 
       {/* Two Column Section: Assessment Evaluation & Counselor Notes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: AIES Evaluation Breakdown */}
+        {/* Left: Clinical Decision Support Evaluation Breakdown */}
         <div className="space-y-4">
-          <Card className="p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-sm">AIES Expert Evaluation</h3>
+          <Card className="p-6 space-y-4 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Clinical Decision Support Evaluation</h3>
               {latestAssessment && (
                 <Badge variant={latestAssessment.resultCategory} size="md">
                   {latestAssessment.resultCategory.replace(/_/g, ' ')}
@@ -197,39 +197,39 @@ export const CaseReview = () => {
             {latestAssessment ? (
               <div className="space-y-4 text-xs">
                 <div>
-                  <strong className="text-slate-800 uppercase tracking-wider block text-[10px] mb-1">
+                  <strong className="text-slate-800 dark:text-slate-200 uppercase tracking-wider block text-[10px] mb-1">
                     System Classification Summary
                   </strong>
-                  <p className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-slate-700 leading-relaxed">
+                  <p className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-300 leading-relaxed">
                     {latestAssessment.summary}
                   </p>
                 </div>
 
                 <div>
-                  <strong className="text-slate-800 uppercase tracking-wider block text-[10px] mb-2">
+                  <strong className="text-slate-800 dark:text-slate-200 uppercase tracking-wider block text-[10px] mb-2">
                     Triggered Rules & Reasoning ({latestAssessment.triggeredRules?.length || 0})
                   </strong>
                   <div className="space-y-2">
                     {latestAssessment.triggeredRules?.map((tr, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 rounded-lg border border-slate-200/80">
-                        <div className="flex items-center justify-between font-bold text-slate-800 mb-1">
+                      <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200/80 dark:border-slate-700">
+                        <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 mb-1">
                           <span>[{tr.ruleCode}] {tr.name}</span>
-                          <span className="text-[10px] text-slate-400">Priority {tr.priority}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">Priority {tr.priority}</span>
                         </div>
-                        <p className="text-slate-600 leading-relaxed text-[11px]">{tr.explanation}</p>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">{tr.explanation}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <strong className="text-slate-800 uppercase tracking-wider block text-[10px] mb-1">
+                  <strong className="text-slate-800 dark:text-slate-200 uppercase tracking-wider block text-[10px] mb-1">
                     System Guidance
                   </strong>
-                  <ul className="space-y-1.5 text-slate-600">
+                  <ul className="space-y-1.5 text-slate-600 dark:text-slate-300">
                     {latestAssessment.guidance?.map((g, i) => (
                       <li key={i} className="flex items-start gap-1.5">
-                        <span className="text-brand-600">•</span>
+                        <span className="text-brand-600 dark:text-brand-400">•</span>
                         <span>{g}</span>
                       </li>
                     ))}
@@ -237,22 +237,22 @@ export const CaseReview = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-slate-400 italic">No assessment has been run yet for this family.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">No assessment has been run yet for this family.</p>
             )}
           </Card>
         </div>
 
         {/* Right: Counselor Clinical Notes Form & History */}
         <div className="space-y-4">
-          <Card className="p-6 space-y-4 border-sky-200">
-            <div className="flex items-center gap-2 border-b border-sky-100 pb-3 text-sky-900">
-              <Stethoscope className="w-4 h-4 text-sky-600" />
+          <Card className="p-6 space-y-4 border-sky-200 dark:border-sky-900/60">
+            <div className="flex items-center gap-2 border-b border-sky-100 dark:border-sky-900/40 pb-3 text-sky-900 dark:text-sky-200">
+              <Stethoscope className="w-4 h-4 text-sky-600 dark:text-sky-400" />
               <h3 className="font-bold text-sm">Add Clinical Notes & Recommendations</h3>
             </div>
 
             <form onSubmit={handleAddNote} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Clinical Observation / Case Note *
                 </label>
                 <textarea
@@ -261,12 +261,12 @@ export const CaseReview = () => {
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
                   placeholder="Record your observations on generational transmission, penetrance, expressivity..."
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Formal Clinical Recommendation
                 </label>
                 <textarea
@@ -274,7 +274,7 @@ export const CaseReview = () => {
                   value={recommendationText}
                   onChange={(e) => setRecommendationText(e.target.value)}
                   placeholder="e.g. Expanded partner carrier screening, PGT-M consultation, targeted variant testing..."
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
 
@@ -293,24 +293,24 @@ export const CaseReview = () => {
 
           {/* Previous Clinical Notes */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Documented Clinical Notes ({notes.length})
             </h4>
 
             {notes.length === 0 ? (
-              <p className="text-xs text-slate-400 italic">No notes recorded yet for this case.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">No notes recorded yet for this case.</p>
             ) : (
               notes.map((n) => (
-                <Card key={n._id} className="p-4 space-y-2 text-xs border-slate-200">
-                  <div className="flex items-center justify-between text-slate-500 text-[11px] border-b border-slate-100 pb-1.5">
-                    <span className="font-bold text-slate-800">{n.counselorId?.name || 'Counselor'}</span>
+                <Card key={n._id} className="p-4 space-y-2 text-xs border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[11px] border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{n.counselorId?.name || 'Counselor'}</span>
                     <span>{new Date(n.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-slate-700 leading-relaxed">{n.note}</p>
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{n.note}</p>
                   {n.recommendation && (
-                    <div className="pt-2 border-t border-slate-100 text-sky-900 bg-sky-50/50 p-2 rounded-lg">
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-sky-900 dark:text-sky-300 bg-sky-50/50 dark:bg-sky-950/40 p-2 rounded-lg">
                       <strong className="block text-[11px] mb-0.5">Formal Recommendation:</strong>
-                      <p className="text-slate-700">{n.recommendation}</p>
+                      <p className="text-slate-700 dark:text-slate-300">{n.recommendation}</p>
                     </div>
                   )}
                 </Card>

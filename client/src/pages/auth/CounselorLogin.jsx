@@ -4,7 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Alert } from '../../components/common/Alert';
-import { Stethoscope, Lock, Mail, ArrowRight, UserCheck, ShieldAlert } from 'lucide-react';
+import { PasswordInput } from '../../components/common/PasswordInput';
+import { getFriendlyErrorMessage } from '../../utils/errorHandler';
+import { Stethoscope, Mail, ArrowRight, UserCheck } from 'lucide-react';
 import { Badge } from '../../components/common/Badge';
 
 export const CounselorLogin = () => {
@@ -24,7 +26,7 @@ export const CounselorLogin = () => {
       await login(email, password, 'COUNSELOR');
       navigate('/counselor/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Authentication failed.');
+      setError(getFriendlyErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -44,44 +46,39 @@ export const CounselorLogin = () => {
             <Stethoscope className="w-6 h-6" />
           </div>
           <Badge variant="info" size="md">Clinical Provider Portal</Badge>
-          <h2 className="text-2xl font-extrabold text-slate-900">Genetic Counselor Sign In</h2>
-          <p className="text-xs text-slate-500">
-            Review assigned patient pedigrees, expert rule evaluations, and clinical notes
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Genetic Counselor Sign In</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Review assigned patient pedigrees, clinical rule evaluations, and clinical notes
           </p>
         </div>
 
-        <Card className="p-8 shadow-lg border-sky-100">
+        <Card className="p-8 shadow-lg border-sky-100 dark:border-slate-800">
           {error && <Alert type="danger" className="mb-4">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Clinical Email</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Clinical Email</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-3 pointer-events-none" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="counselor@pedigree.local"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                />
-              </div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
             </div>
 
             <Button
@@ -95,11 +92,11 @@ export const CounselorLogin = () => {
           </form>
 
           {/* Quick Demo Fill Button */}
-          <div className="mt-4 pt-4 border-t border-slate-100 text-center">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
             <button
               type="button"
               onClick={handleQuickFill}
-              className="text-xs text-sky-700 hover:text-sky-800 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors"
+              className="text-xs text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 rounded-lg transition-colors"
             >
               <UserCheck className="w-3.5 h-3.5" /> Quick-Fill Demo Counselor (Dr. Sarah Chen)
             </button>
@@ -107,10 +104,10 @@ export const CounselorLogin = () => {
         </Card>
 
         {/* Portal Switcher Links */}
-        <div className="flex items-center justify-center gap-4 text-xs text-slate-500">
-          <Link to="/login" className="hover:text-brand-600">Patient Portal</Link>
+        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <Link to="/login" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Patient Portal</Link>
           <span>•</span>
-          <Link to="/admin/login" className="hover:text-purple-600">Admin Portal</Link>
+          <Link to="/admin/login" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Admin Portal</Link>
         </div>
       </div>
     </div>

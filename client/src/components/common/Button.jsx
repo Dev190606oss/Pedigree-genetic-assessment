@@ -14,11 +14,11 @@ export const Button = ({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
-    primary: 'bg-brand-600 hover:bg-brand-700 text-white focus:ring-brand-500 shadow-sm active:bg-brand-800',
-    secondary: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 focus:ring-slate-300 shadow-sm',
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500 shadow-sm',
-    ghost: 'bg-transparent hover:bg-slate-100 text-slate-600 focus:ring-slate-300',
-    dark: 'bg-slate-900 hover:bg-slate-800 text-white focus:ring-slate-700 shadow-sm'
+    primary: 'bg-brand-600 hover:bg-brand-700 text-white focus:ring-brand-500 shadow-sm active:bg-brand-800 dark:bg-brand-600 dark:hover:bg-brand-500',
+    secondary: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 focus:ring-slate-300 shadow-sm dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 dark:focus:ring-slate-600',
+    danger: 'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500 shadow-sm dark:bg-rose-600 dark:hover:bg-rose-500',
+    ghost: 'bg-transparent hover:bg-slate-100 text-slate-600 focus:ring-slate-300 dark:hover:bg-slate-800 dark:text-slate-300 dark:focus:ring-slate-700',
+    dark: 'bg-slate-900 hover:bg-slate-800 text-white focus:ring-slate-700 shadow-sm dark:bg-slate-800 dark:hover:bg-slate-700 dark:border dark:border-slate-700'
   };
 
   const sizes = {

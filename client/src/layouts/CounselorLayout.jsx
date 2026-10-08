@@ -1,8 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { Navbar } from './Navbar';
-import { LayoutDashboard, ClipboardList, Stethoscope, CheckCircle2, ShieldCheck } from 'lucide-react';
-import { Badge } from '../components/common/Badge';
+import { LayoutDashboard, ClipboardList, Stethoscope } from 'lucide-react';
 
 export const CounselorLayout = () => {
   const navItems = [
@@ -11,23 +10,23 @@ export const CounselorLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/80">
+    <div className="min-h-screen flex flex-col bg-slate-50/80 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col md:flex-row gap-8">
         {/* Counselor Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm sticky top-24 space-y-6">
-            <div className="p-3 bg-sky-50 rounded-xl border border-sky-100 flex items-center gap-2.5">
-              <Stethoscope className="w-5 h-5 text-sky-600" />
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm sticky top-24 space-y-6 transition-colors">
+            <div className="p-3 bg-sky-50 dark:bg-sky-950/40 rounded-xl border border-sky-100 dark:border-sky-800/60 flex items-center gap-2.5">
+              <Stethoscope className="w-5 h-5 text-sky-600 dark:text-sky-400" />
               <div>
-                <p className="text-xs font-bold text-sky-900">Clinical Portal</p>
-                <p className="text-[10px] text-sky-600">Genetic Counselor Review</p>
+                <p className="text-xs font-bold text-sky-900 dark:text-sky-200">Clinical Portal</p>
+                <p className="text-[10px] text-sky-600 dark:text-sky-400">Genetic Counselor Review</p>
               </div>
             </div>
 
             <div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 block">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 block">
                 Clinical Workflow
               </span>
               <nav className="space-y-1">
@@ -40,12 +39,12 @@ export const CounselorLayout = () => {
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                           isActive
-                            ? 'bg-sky-50 text-sky-800 font-semibold'
-                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                            ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 font-semibold'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
                         }`
                       }
                     >
-                      <Icon className="w-4 h-4 text-sky-600" />
+                      <Icon className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                       {item.label}
                     </NavLink>
                   );

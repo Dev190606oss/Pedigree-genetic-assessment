@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ZoomIn, ZoomOut, RotateCcw, Info, User, Activity, AlertCircle, Heart } from 'lucide-react';
 import { Badge } from '../../components/common/Badge';
+import { getRelationshipDefinition } from '../../utils/relationshipHelper';
 
 export const PedigreeGraph = ({ members = [], relationships = [], conditions = [], onSelectMember }) => {
   const svgRef = useRef(null);
@@ -47,10 +48,20 @@ export const PedigreeGraph = ({ members = [], relationships = [], conditions = [
 
       if (!fromId || !toId || !parentsMap[fromId] || !parentsMap[toId]) return;
 
-      if (rel.type === 'PARENT_CHILD') {
-        parentsMap[toId].push(fromId);
-        childrenMap[fromId].push(toId);
-      } else if (rel.type === 'SPOUSE' || rel.type === 'PARTNER') {
+      const def = getRelationshipDefinition(rel.type);
+      const baseType = rel.metadata?.baseType || def.baseType;
+      const isBio = rel.metadata?.isBiological !== undefined ? rel.metadata.isBiological : def.isBiological;
+      const dir = rel.metadata?.direction || def.direction;
+
+      if (baseType === 'PARENT_CHILD' && isBio) {
+        if (dir === 'CHILD_TO_PARENT') {
+          parentsMap[fromId].push(toId);
+          childrenMap[toId].push(fromId);
+        } else {
+          parentsMap[toId].push(fromId);
+          childrenMap[fromId].push(toId);
+        }
+      } else if (baseType === 'SPOUSE' || baseType === 'PARTNER') {
         couples.push({ from: fromId, to: toId, type: rel.type });
       }
     });
@@ -83,6 +94,34 @@ export const PedigreeGraph = ({ members = [], relationships = [], conditions = [
         const maxGen = Math.max(gFrom, gTo);
         generationMap[from] = maxGen;
         generationMap[to] = maxGen;
+      });
+
+      // Align extended relationships (grandparents, aunts/uncles, cousins)
+      relationships.forEach(rel => {
+        const fromId = (rel.fromMemberId?._id || rel.fromMemberId)?.toString();
+        const toId = (rel.toMemberId?._id || rel.toMemberId)?.toString();
+        if (!fromId || !toId) return;
+
+        const def = getRelationshipDefinition(rel.type);
+        const baseType = rel.metadata?.baseType || def.baseType;
+
+        if (baseType === 'GRANDPARENT') {
+          if (def.direction !== 'CHILD_TO_PARENT') {
+            if (generationMap[toId] && !generationMap[fromId]) {
+              generationMap[fromId] = Math.max(1, generationMap[toId] - 2);
+            }
+          }
+        } else if (baseType === 'AUNT_UNCLE') {
+          if (generationMap[toId] && !generationMap[fromId]) {
+            generationMap[fromId] = Math.max(1, generationMap[toId] - 1);
+          }
+        } else if (baseType === 'COUSIN') {
+          if (generationMap[toId] && !generationMap[fromId]) {
+            generationMap[fromId] = generationMap[toId];
+          } else if (generationMap[fromId] && !generationMap[toId]) {
+            generationMap[toId] = generationMap[fromId];
+          }
+        }
       });
 
       // Fallback for isolated nodes

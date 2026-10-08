@@ -22,16 +22,16 @@ export const Modal = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
         <div
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         ></div>
 
-        <div className={`relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full ${maxWidth} border border-slate-200`}>
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
+        <div className={`relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full ${maxWidth} border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100`}>
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{title}</h3>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

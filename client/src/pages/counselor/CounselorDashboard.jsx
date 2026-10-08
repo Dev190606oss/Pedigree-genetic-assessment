@@ -6,44 +6,52 @@ import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Alert } from '../../components/common/Alert';
 import {
-  Stethoscope,
   ClipboardList,
-  Clock,
+  Stethoscope,
+  Users,
   CheckCircle2,
+  Clock,
   ArrowRight,
-  User,
-  GitMerge,
   FileText
 } from 'lucide-react';
 
 export const CounselorDashboard = () => {
+  const [assignedCases, setAssignedCases] = useState([]);
   const [stats, setStats] = useState({
     totalAssigned: 0,
     pendingCases: 0,
     completedCases: 0,
     totalNotes: 0
   });
-  const [assignedCases, setAssignedCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCases = async () => {
       try {
-        const [statsRes, casesRes] = await Promise.all([
-          api.get('/counselor/stats'),
-          api.get('/counselor/cases')
-        ]);
+        const res = await api.get('/counselor/cases');
+        if (res.data.success) {
+          const cases = res.data.data;
+          setAssignedCases(cases);
 
-        if (statsRes.data.success) setStats(statsRes.data.data);
-        if (casesRes.data.success) setAssignedCases(casesRes.data.data);
+          const pending = cases.filter(c => c.status !== 'COMPLETED').length;
+          const completed = cases.filter(c => c.status === 'COMPLETED').length;
+          const notesCount = cases.reduce((acc, c) => acc + (c.notes?.length || 0), 0);
+
+          setStats({
+            totalAssigned: cases.length,
+            pendingCases: pending,
+            completedCases: completed,
+            totalNotes: notesCount
+          });
+        }
       } catch (err) {
-        setError('Failed to load counselor dashboard data.');
+        setError('Failed to load counselor cases.');
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchCases();
   }, []);
 
   return (
@@ -58,7 +66,7 @@ export const CounselorDashboard = () => {
             Genetic Counselor Portal
           </h1>
           <p className="text-xs sm:text-sm text-sky-100 leading-relaxed">
-            Review patient pedigrees, examine deterministic AIES rule outcomes, and provide personalized clinical genetic recommendations.
+            Review patient pedigrees, examine evidence-based clinical rule outcomes, and provide personalized clinical recommendations.
           </p>
         </div>
 
@@ -73,43 +81,43 @@ export const CounselorDashboard = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-700 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 flex items-center justify-center">
             <ClipboardList className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Total Assigned</p>
-            <p className="text-2xl font-bold text-slate-800">{stats.totalAssigned}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Assigned</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.totalAssigned}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center">
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Pending Review</p>
-            <p className="text-2xl font-bold text-slate-800">{stats.pendingCases}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Pending Review</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.pendingCases}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Completed Reviews</p>
-            <p className="text-2xl font-bold text-slate-800">{stats.completedCases}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Completed Reviews</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.completedCases}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 flex items-center justify-center">
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Clinical Notes</p>
-            <p className="text-2xl font-bold text-slate-800">{stats.totalNotes}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Clinical Notes</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.totalNotes}</p>
           </div>
         </Card>
       </div>
@@ -118,23 +126,23 @@ export const CounselorDashboard = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Assigned Patient Cases</h2>
-            <p className="text-xs text-slate-500">Pedigrees awaiting clinical evaluation or formal recommendations</p>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Assigned Patient Cases</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Pedigrees awaiting clinical evaluation or formal recommendations</p>
           </div>
-          <Link to="/counselor/cases" className="text-xs font-semibold text-sky-700 hover:text-sky-800">
+          <Link to="/counselor/cases" className="text-xs font-semibold text-sky-700 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300">
             View All ({assignedCases.length})
           </Link>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">Loading assigned cases...</div>
+          <div className="p-12 text-center text-slate-400 dark:text-slate-500 text-sm">Loading assigned cases...</div>
         ) : assignedCases.length === 0 ? (
-          <Card className="p-12 text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto">
+          <Card className="p-12 text-center space-y-2 border-slate-200 dark:border-slate-800">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center mx-auto">
               <Stethoscope className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-slate-900">No Cases Currently Assigned</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No Cases Currently Assigned</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
               New patient cases will appear here once assigned by system administration.
             </p>
           </Card>
@@ -145,24 +153,24 @@ export const CounselorDashboard = () => {
               if (!family) return null;
 
               return (
-                <Card key={item._id} className="p-5 flex flex-col justify-between space-y-4 hover:border-sky-300 transition-colors">
+                <Card key={item._id} className="p-5 flex flex-col justify-between space-y-4 hover:border-sky-300 dark:hover:border-sky-700 transition-colors border-slate-200 dark:border-slate-800">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-slate-900 text-sm">{family.name}</h3>
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{family.name}</h3>
                       <Badge variant={item.status === 'COMPLETED' ? 'success' : item.status === 'IN_REVIEW' ? 'info' : 'warning'} size="sm">
                         {item.status}
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-600">
-                      Patient: <span className="font-semibold text-slate-800">{family.ownerId?.name || 'Anonymous'}</span> ({family.ownerId?.email})
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                      Patient: <span className="font-semibold text-slate-800 dark:text-slate-200">{family.ownerId?.name || 'Anonymous'}</span> ({family.ownerId?.email})
                     </p>
                     {family.description && (
-                      <p className="text-[11px] text-slate-500 line-clamp-2 italic">"{family.description}"</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 italic">"{family.description}"</p>
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-[11px] text-slate-400">
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500">
                       Assigned {new Date(item.assignedAt).toLocaleDateString()}
                     </span>
                     <Link to={`/counselor/cases/${family._id}`}>

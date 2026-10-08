@@ -64,6 +64,15 @@ const ruleSchema = new mongoose.Schema(
         default: 'MODERATE'
       }
     },
+    conclusion: {
+      fact: {
+        type: String,
+        trim: true
+      },
+      value: {
+        type: mongoose.Schema.Types.Mixed
+      }
+    },
     explanation: {
       type: String,
       required: [true, 'Explanation template is required']

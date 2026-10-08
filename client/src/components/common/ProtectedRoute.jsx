@@ -9,9 +9,9 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
-        <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-sm font-medium text-slate-600">Verifying session credentials...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="w-12 h-12 border-4 border-brand-200 dark:border-brand-900 border-t-brand-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-sm font-medium text-slate-600 dark:text-slate-400">Verifying session credentials...</p>
       </div>
     );
   }
@@ -29,14 +29,14 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-rose-100 text-center">
-          <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-rose-100 dark:border-rose-950 text-center">
+          <div className="w-16 h-16 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Access Denied (403)</h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Your current role (<span className="font-semibold text-slate-800">{role}</span>) does not have authorization to view this area.
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Access Denied (403)</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+            Your current role (<span className="font-semibold text-slate-800 dark:text-slate-200">{role}</span>) does not have authorization to view this area.
           </p>
           <div className="space-y-3">
             {role === 'USER' && (

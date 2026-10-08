@@ -4,7 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Alert } from '../../components/common/Alert';
-import { Cpu, Lock, Mail, ArrowRight, UserCheck, ShieldCheck } from 'lucide-react';
+import { PasswordInput } from '../../components/common/PasswordInput';
+import { getFriendlyErrorMessage } from '../../utils/errorHandler';
+import { Cpu, Mail, ArrowRight, UserCheck } from 'lucide-react';
 import { Badge } from '../../components/common/Badge';
 
 export const AdminLogin = () => {
@@ -24,7 +26,7 @@ export const AdminLogin = () => {
       await login(email, password, 'ADMIN');
       navigate('/admin/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Authentication failed.');
+      setError(getFriendlyErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -44,44 +46,39 @@ export const AdminLogin = () => {
             <Cpu className="w-6 h-6" />
           </div>
           <Badge variant="purple" size="md">System Administration Portal</Badge>
-          <h2 className="text-2xl font-extrabold text-slate-900">Administrator Sign In</h2>
-          <p className="text-xs text-slate-500">
-            Govern AIES rule knowledge base, users, conditions, and system audit logs
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Administrator Sign In</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Govern clinical rule knowledge base, users, conditions, and system audit logs
           </p>
         </div>
 
-        <Card className="p-8 shadow-lg border-purple-100">
+        <Card className="p-8 shadow-lg border-purple-100 dark:border-slate-800">
           {error && <Alert type="danger" className="mb-4">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Email</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Admin Email</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-3 pointer-events-none" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@pedigree.local"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                />
-              </div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
             </div>
 
             <Button
@@ -95,11 +92,11 @@ export const AdminLogin = () => {
           </form>
 
           {/* Quick Demo Fill Button */}
-          <div className="mt-4 pt-4 border-t border-slate-100 text-center">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
             <button
               type="button"
               onClick={handleQuickFill}
-              className="text-xs text-purple-700 hover:text-purple-800 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+              className="text-xs text-purple-700 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-200 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg transition-colors"
             >
               <UserCheck className="w-3.5 h-3.5" /> Quick-Fill Demo Admin Account
             </button>
@@ -107,10 +104,10 @@ export const AdminLogin = () => {
         </Card>
 
         {/* Portal Switcher Links */}
-        <div className="flex items-center justify-center gap-4 text-xs text-slate-500">
-          <Link to="/login" className="hover:text-brand-600">Patient Portal</Link>
+        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <Link to="/login" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Patient Portal</Link>
           <span>•</span>
-          <Link to="/counselor/login" className="hover:text-sky-600">Counselor Portal</Link>
+          <Link to="/counselor/login" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors">Counselor Portal</Link>
         </div>
       </div>
     </div>

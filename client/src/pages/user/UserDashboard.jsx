@@ -121,44 +121,44 @@ export const UserDashboard = () => {
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Family Cases</p>
-            <p className="text-2xl font-bold text-slate-800">{families.length}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Family Cases</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{families.length}</p>
           </div>
         </Card>
 
         <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Evaluations Run</p>
-            <p className="text-2xl font-bold text-slate-800">{recentAssessments.length}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Evaluations Run</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{recentAssessments.length}</p>
           </div>
         </Card>
 
         <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
             <GitMerge className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Pedigree Status</p>
-            <p className="text-sm font-bold text-slate-800">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Pedigree Status</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
               {latestFamily ? 'Diagram Ready' : 'Awaiting Data'}
             </p>
           </div>
         </Card>
 
         <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Latest Outcome</p>
-            <p className="text-xs font-bold text-slate-800 truncate">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Latest Outcome</p>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
               {latestAssessment ? latestAssessment.resultCategory.replace(/_/g, ' ') : 'Not yet evaluated'}
             </p>
           </div>
@@ -170,17 +170,17 @@ export const UserDashboard = () => {
         {/* Left 2 Cols: My Family Cases */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900">My Family Cases</h2>
-            <Link to="/user/families/new" className="text-xs text-brand-600 hover:text-brand-700 font-semibold flex items-center gap-1">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">My Family Cases</h2>
+            <Link to="/user/families/new" className="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold flex items-center gap-1">
               <PlusCircle className="w-3.5 h-3.5" /> Add New Family
             </Link>
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-slate-400 text-sm">Loading family records...</div>
+            <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-sm">Loading family records...</div>
           ) : families.length === 0 ? (
             <Card className="p-8 text-center space-y-3">
-              <p className="text-sm text-slate-600">You haven't recorded any family cases yet.</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">You haven't recorded any family cases yet.</p>
               <Link to="/user/families/new">
                 <Button size="sm">Get Started with Family Builder</Button>
               </Link>
@@ -191,13 +191,13 @@ export const UserDashboard = () => {
                 <Card key={fam._id} hover className="p-5 flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-900 text-sm">{fam.name}</h3>
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{fam.name}</h3>
                       <Badge variant="brand" size="sm">{fam.status}</Badge>
                     </div>
                     {fam.description && (
-                      <p className="text-xs text-slate-500 max-w-md line-clamp-1">{fam.description}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md line-clamp-1">{fam.description}</p>
                     )}
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">
                       Updated {new Date(fam.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -222,16 +222,16 @@ export const UserDashboard = () => {
 
         {/* Right 1 Col: Latest Assessment Summary */}
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-slate-900">Latest Assessment</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Latest Assessment</h2>
 
           {latestAssessment ? (
-            <Card className="p-6 space-y-4 border-slate-200">
+            <Card className="p-6 space-y-4 border-slate-200 dark:border-slate-800">
               <div className="flex items-start justify-between">
                 <div>
                   <Badge variant={latestAssessment.resultCategory} size="md">
                     {latestAssessment.resultCategory.replace(/_/g, ' ')}
                   </Badge>
-                  <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {new Date(latestAssessment.createdAt).toLocaleDateString()}
                   </p>
@@ -239,15 +239,15 @@ export const UserDashboard = () => {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">AIES Summary</h4>
-                <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Assessment Summary</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
                   {latestAssessment.summary}
                 </p>
               </div>
 
               <div>
-                <p className="text-xs font-semibold text-slate-700">
-                  {latestAssessment.triggeredRules?.length || 0} Genetic Rule(s) Triggered
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {latestAssessment.triggeredRules?.length || 0} Genetic Rule(s) Evaluated
                 </p>
               </div>
 
@@ -268,7 +268,7 @@ export const UserDashboard = () => {
               </div>
             </Card>
           ) : (
-            <Card className="p-6 text-center space-y-2 text-xs text-slate-500">
+            <Card className="p-6 text-center space-y-2 text-xs text-slate-500 dark:text-slate-400">
               <p>No assessment has been evaluated yet for your family case.</p>
               {latestFamily && (
                 <Link to={`/user/families/${latestFamily._id}/builder?step=6`}>

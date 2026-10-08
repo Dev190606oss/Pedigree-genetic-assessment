@@ -6,15 +6,14 @@ import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Alert } from '../../components/common/Alert';
 import {
-  Cpu,
   Users,
   Stethoscope,
-  BookOpen,
   Activity,
+  Cpu,
   ShieldAlert,
-  ArrowRight,
+  BarChart2,
   TrendingUp,
-  BarChart2
+  FileText
 } from 'lucide-react';
 
 export const AdminDashboard = () => {
@@ -40,8 +39,8 @@ export const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Admin Header */}
-      <div className="bg-gradient-to-r from-purple-800 via-indigo-900 to-slate-900 rounded-3xl p-8 text-white shadow-lg shadow-purple-900/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      {/* Governance Banner */}
+      <div className="bg-gradient-to-r from-purple-800 via-indigo-900 to-slate-950 rounded-3xl p-8 text-white shadow-lg shadow-purple-950/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-xl">
           <Badge variant="default" size="sm" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
             System Administration
@@ -50,14 +49,14 @@ export const AdminDashboard = () => {
             Administrator Governance Portal
           </h1>
           <p className="text-xs sm:text-sm text-purple-100 leading-relaxed">
-            Monitor system-wide preconception assessment activity, manage genetic counselors and user accounts, and govern the live AIES expert rules knowledge base.
+            Monitor system-wide preconception assessment activity, manage genetic counselors and user accounts, and govern the clinical rules knowledge base.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <Link to="/admin/rules">
             <Button size="md" className="!bg-white !text-purple-900 hover:!bg-purple-50 shadow-md">
-              <Cpu className="w-4 h-4 mr-1.5 text-purple-700" /> AIES Rules Knowledge Base
+              <Cpu className="w-4 h-4 mr-1.5 text-purple-700" /> Clinical Rules Knowledge Base
             </Button>
           </Link>
           <Link to="/admin/audit-logs">
@@ -72,43 +71,43 @@ export const AdminDashboard = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Patient Accounts</p>
-            <p className="text-2xl font-bold text-slate-800">{analytics?.totalUsers || 0}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Patient Accounts</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{analytics?.totalUsers || 0}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
             <Stethoscope className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Genetic Counselors</p>
-            <p className="text-2xl font-bold text-slate-800">{analytics?.totalCounselors || 0}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Genetic Counselors</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{analytics?.totalCounselors || 0}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">Family Cases</p>
-            <p className="text-2xl font-bold text-slate-800">{analytics?.totalFamilies || 0}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Family Cases</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{analytics?.totalFamilies || 0}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
             <Cpu className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500">AIES Evaluations</p>
-            <p className="text-2xl font-bold text-slate-800">{analytics?.totalAssessments || 0}</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Health Assessments</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{analytics?.totalAssessments || 0}</p>
           </div>
         </Card>
       </div>
@@ -116,13 +115,13 @@ export const AdminDashboard = () => {
       {/* Analytics Breakdown Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Risk Category Distribution */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <Card className="p-6 space-y-4 border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Outcome Category Distribution</h3>
-              <p className="text-xs text-slate-500">Evaluated outcomes across all patient cases</p>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Outcome Category Distribution</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Evaluated outcomes across all patient cases</p>
             </div>
-            <BarChart2 className="w-4 h-4 text-slate-400" />
+            <BarChart2 className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           </div>
 
           <div className="space-y-3">
@@ -134,10 +133,10 @@ export const AdminDashboard = () => {
                 return (
                   <div key={cat} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-slate-700">{cat.replace(/_/g, ' ')}</span>
-                      <span className="text-slate-500">{count} ({pct}%)</span>
+                      <span className="text-slate-700 dark:text-slate-300">{cat.replace(/_/g, ' ')}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{count} ({pct}%)</span>
                     </div>
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full ${
                           cat === 'COUNSELOR_REVIEW'
@@ -153,31 +152,31 @@ export const AdminDashboard = () => {
                 );
               })
             ) : (
-              <p className="text-xs text-slate-400 italic">No assessment outcomes computed yet.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">No assessment outcomes computed yet.</p>
             )}
           </div>
         </Card>
 
         {/* Rule Triggering Frequencies */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <Card className="p-6 space-y-4 border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Triggered Rule Frequencies</h3>
-              <p className="text-xs text-slate-500">Most active rules in the AIES inference engine</p>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Triggered Rule Frequencies</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Most active rules in the clinical inference engine</p>
             </div>
-            <TrendingUp className="w-4 h-4 text-slate-400" />
+            <TrendingUp className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           </div>
 
           <div className="space-y-3">
             {analytics?.ruleFrequency && Object.keys(analytics.ruleFrequency).length > 0 ? (
               Object.entries(analytics.ruleFrequency).map(([ruleCode, count]) => (
-                <div key={ruleCode} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                  <span className="font-bold text-slate-800">{ruleCode}</span>
+                <div key={ruleCode} className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700 text-xs">
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{ruleCode}</span>
                   <Badge variant="purple" size="sm">Fired {count} time(s)</Badge>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-400 italic">No rules triggered yet.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">No rules triggered yet.</p>
             )}
           </div>
         </Card>

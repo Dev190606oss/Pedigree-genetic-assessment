@@ -146,7 +146,7 @@ const getRules = async (req, res, next) => {
 
 const createRule = async (req, res, next) => {
   try {
-    const { ruleCode, name, description, category, priority, conditions, result, explanation, guidance, isActive } = req.body;
+    const { ruleCode, name, description, category, priority, conditions, conclusion, result, explanation, guidance, isActive } = req.body;
 
     if (!name || !conditions || !result || !explanation) {
       return res.status(400).json({ success: false, error: 'Name, conditions, result category, and explanation are required.' });
@@ -159,6 +159,7 @@ const createRule = async (req, res, next) => {
       category: category || 'GENERAL_GENETICS',
       priority: priority !== undefined ? Number(priority) : 10,
       conditions,
+      conclusion: conclusion || null,
       result,
       explanation: explanation.trim(),
       guidance: Array.isArray(guidance) ? guidance : (guidance ? [guidance] : []),
@@ -185,7 +186,7 @@ const updateRule = async (req, res, next) => {
     const rule = await Rule.findById(req.params.id);
     if (!rule) return res.status(404).json({ success: false, error: 'Rule not found.' });
 
-    const fields = ['ruleCode', 'name', 'description', 'category', 'priority', 'conditions', 'result', 'explanation', 'guidance', 'isActive'];
+    const fields = ['ruleCode', 'name', 'description', 'category', 'priority', 'conditions', 'conclusion', 'result', 'explanation', 'guidance', 'isActive'];
     fields.forEach(f => {
       if (req.body[f] !== undefined) rule[f] = req.body[f];
     });

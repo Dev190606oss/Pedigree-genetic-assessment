@@ -1,6 +1,11 @@
 const { Family, FamilyMember, Relationship, Condition, FamilyMemberCondition, Assessment } = require('../models');
 const { ROLES } = require('../constants');
 const { logAudit } = require('../middleware/audit');
+const {
+  validateRelationship,
+  normalizeRelationshipRecord,
+  deriveAllRelationships
+} = require('../utils/relationshipHelper');
 
 // Helper to check family ownership/access
 const checkFamilyAccess = async (familyId, user) => {
@@ -69,12 +74,15 @@ const getFamilyById = async (req, res, next) => {
     const conditions = await FamilyMemberCondition.find({ familyId: family._id }).populate('conditionId memberId');
     const latestAssessment = await Assessment.findOne({ familyId: family._id }).sort({ createdAt: -1 });
 
+    const derived = deriveAllRelationships(members, relationships);
+
     res.json({
       success: true,
       data: {
         family,
         members,
         relationships,
+        derivedRelationships: derived.derived,
         conditions,
         latestAssessment
       }
@@ -243,26 +251,27 @@ const addRelationship = async (req, res, next) => {
       return res.status(400).json({ success: false, error: 'Both members must exist within this family.' });
     }
 
-    // Check for existing identical relationship
-    const existing = await Relationship.findOne({
-      familyId: family._id,
-      $or: [
-        { fromMemberId, toMemberId, type },
-        // For reciprocal relationships (SPOUSE, PARTNER, SIBLING)
-        { fromMemberId: toMemberId, toMemberId: fromMemberId, type }
-      ]
-    });
+    // Check for existing relationships and validate
+    const existingRelationships = await Relationship.find({ familyId: family._id });
+    const validation = validateRelationship(existingRelationships, fromMember, toMember, type);
 
-    if (existing) {
-      return res.status(400).json({ success: false, error: 'This relationship already exists between these members.' });
+    if (!validation.isValid) {
+      return res.status(400).json({ success: false, error: validation.error });
     }
+
+    const normalized = normalizeRelationshipRecord(fromMember, toMember, type);
+
+    const mergedMetadata = {
+      ...(metadata || {}),
+      ...(normalized.metadata || {})
+    };
 
     const relationship = await Relationship.create({
       familyId: family._id,
-      fromMemberId,
-      toMemberId,
-      type,
-      metadata: metadata || {}
+      fromMemberId: normalized.fromMemberId,
+      toMemberId: normalized.toMemberId,
+      type: normalized.type,
+      metadata: mergedMetadata
     });
 
     const populated = await Relationship.findById(relationship._id).populate('fromMemberId toMemberId');
