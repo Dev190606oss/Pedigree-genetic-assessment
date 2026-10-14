@@ -29,7 +29,10 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
-  Info
+  Info,
+  RotateCcw,
+  FlaskConical,
+  ShieldCheck
 } from 'lucide-react';
 
 const STEPS = [
@@ -62,6 +65,14 @@ export const FamilyBuilder = () => {
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [showRelModal, setShowRelModal] = useState(false);
   const [showCondModal, setShowCondModal] = useState(false);
+  const [showScenarioModal, setShowScenarioModal] = useState(false);
+
+  // Quick Fill Synthetic Scenarios State
+  const [availableScenarios, setAvailableScenarios] = useState([]);
+  const [selectedScenarioKey, setSelectedScenarioKey] = useState('recessive_consanguinity');
+  const [applyingScenario, setApplyingScenario] = useState(false);
+  const [resettingCase, setResettingCase] = useState(false);
+  const [scenarioMessage, setScenarioMessage] = useState(null);
 
   // Form states
   const [memberName, setMemberName] = useState('');
@@ -112,11 +123,132 @@ export const FamilyBuilder = () => {
     } else {
       setLoading(false);
     }
+    // Fetch available synthetic scenarios for Quick Fill
+    api.get('/families/quick-fill-scenarios')
+      .then(res => {
+        if (res.data?.success && res.data.data) {
+          setAvailableScenarios(res.data.data);
+        }
+      })
+      .catch(() => {});
   }, [id]);
 
   const handleStepChange = (newStep) => {
     setCurrentStep(newStep);
     setSearchParams({ step: newStep });
+  };
+
+  // Apply Synthetic Quick Fill Scenario
+  const handleApplyScenario = async (scenarioKey) => {
+    setApplyingScenario(true);
+    setError('');
+    try {
+      const res = await api.post(`/families/${id}/quick-fill`, {
+        scenarioKey: scenarioKey || selectedScenarioKey
+      });
+      if (res.data.success) {
+        setScenarioMessage({
+          type: 'success',
+          text: res.data.message || 'Synthetic scenario applied successfully.',
+          title: res.data.scenario?.title,
+          badge: res.data.scenario?.badge
+        });
+        setShowScenarioModal(false);
+        await fetchFamilyDetails();
+        handleStepChange(1); // Jump to members to see populated lineage
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || err.message || 'Failed to apply synthetic scenario.');
+    } finally {
+      setApplyingScenario(false);
+    }
+  };
+
+  // Reset / Clear Case
+  const handleResetCase = async () => {
+    if (!window.confirm('Are you sure you want to reset this case? All members, relationships, conditions, and previous assessments will be permanently cleared so you can start fresh.')) {
+      return;
+    }
+    setResettingCase(true);
+    try {
+      const res = await api.post(`/families/${id}/reset`);
+      if (res.data.success) {
+        setScenarioMessage({
+          type: 'info',
+          text: 'Family case has been reset to empty state.'
+        });
+        await fetchFamilyDetails();
+        handleStepChange(0);
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to reset family case.');
+    } finally {
+      setResettingCase(false);
+    }
+  };
+
+  // Quick fill helper for Add Member modal
+  const handleQuickFillMember = () => {
+    const hasProband = members.some(m => m.isProband);
+    if (!hasProband) {
+      setMemberName('Alex Morgan (Proband)');
+      setMemberSex('FEMALE');
+      setMemberDob('1996-04-12');
+      setMemberIsProband(true);
+      setMemberDeceased(false);
+      setMemberNotes('Proband seeking preconception genetic risk assessment.');
+    } else {
+      const proband = members.find(m => m.isProband);
+      setMemberName('Jordan Morgan');
+      setMemberSex(proband?.sex === 'FEMALE' ? 'MALE' : 'FEMALE');
+      setMemberDob('1994-08-20');
+      setMemberIsProband(false);
+      setMemberDeceased(false);
+      setMemberNotes('Reproductive partner. Carrier screening completed.');
+    }
+  };
+
+  // Quick fill helper for Add Condition modal
+  const handleQuickFillCondition = () => {
+    if (members.length === 0 || conditionsCatalog.length === 0) return;
+    const targetMember = members.find(m => m.isProband) || members[0];
+    setCondMemberId(targetMember._id);
+
+    const chosenCond = conditionsCatalog.find(c => c._id === condId) || conditionsCatalog[0];
+    setCondId(chosenCond._id);
+
+    if (chosenCond.category === 'AUTOSOMAL_DOMINANT') {
+      setCondStatus('AFFECTED');
+      setCondAge('44');
+      setCondNotes('Early onset clinical diagnosis confirmed by molecular genetics.');
+    } else if (chosenCond.category === 'X_LINKED') {
+      const isFemale = targetMember.sex === 'FEMALE';
+      setCondStatus(isFemale ? 'CARRIER' : 'AFFECTED');
+      setCondAge(isFemale ? '' : '3');
+      setCondNotes(isFemale ? 'DNA sequencing confirmed carrier of pathogenic variant.' : 'Factor VIII deficiency with severe clinical phenotype.');
+    } else {
+      setCondStatus('CARRIER');
+      setCondAge('');
+      setCondNotes('Heterozygous pathogenic variant identified through targeted carrier screening.');
+    }
+  };
+
+  // Quick fill helper for Add Relationship modal
+  const handleQuickFillRelationship = () => {
+    if (members.length < 2) return;
+    const proband = members.find(m => m.isProband);
+    const other = members.find(m => !m.isProband) || members[1];
+    if (proband && other) {
+      setRelFrom(proband._id);
+      setRelTo(other._id);
+      setRelType('PARTNER');
+      setRelError('');
+    } else {
+      setRelFrom(members[0]._id);
+      setRelTo(members[1]._id);
+      setRelType('PARENT_CHILD');
+      setRelError('');
+    }
   };
 
   // Add Member
@@ -285,7 +417,26 @@ export const FamilyBuilder = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowScenarioModal(true)}
+              className="bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200 font-semibold"
+              title="Populate a clinically realistic synthetic pedigree for AIES demonstration"
+            >
+              <Sparkles className="w-3.5 h-3.5 mr-1 text-amber-600" /> Quick Fill Scenario
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleResetCase}
+              loading={resettingCase}
+              className="hover:text-rose-600 hover:border-rose-200"
+              title="Reset case to empty state"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </Button>
             <Link to="/user/families">
               <Button variant="secondary" size="sm">Back to Cases</Button>
             </Link>
@@ -301,6 +452,19 @@ export const FamilyBuilder = () => {
           </div>
         </div>
 
+        {familyData?.family?.name?.includes('[Synthetic Demo]') && (
+          <div className="mt-3 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200/70 text-indigo-900 text-xs flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-indigo-600 shrink-0" />
+              <span className="font-semibold">Simulated Clinical Case:</span>
+              <span className="text-indigo-700">Populated with valid synthetic pedigree data for syllabus-aligned rule evaluation.</span>
+            </div>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+              AIES Demo
+            </span>
+          </div>
+        )}
+
         <Stepper
           steps={STEPS}
           currentStep={currentStep}
@@ -308,34 +472,165 @@ export const FamilyBuilder = () => {
         />
       </div>
 
+      {scenarioMessage && (
+        <Alert type={scenarioMessage.type || 'info'} onClose={() => setScenarioMessage(null)}>
+          <div className="flex items-center justify-between">
+            <div>
+              {scenarioMessage.title && <p className="font-bold">{scenarioMessage.title}</p>}
+              <p className="text-xs">{scenarioMessage.text}</p>
+            </div>
+            {scenarioMessage.badge && (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-white/80 border text-slate-800">
+                {scenarioMessage.badge}
+              </span>
+            )}
+          </div>
+        </Alert>
+      )}
+
       {error && <Alert type="danger">{error}</Alert>}
 
       {/* --- STEP 0: BASIC INFO --- */}
       {currentStep === 0 && (
-        <Card className="p-6 space-y-4 max-w-2xl">
-          <h2 className="text-base font-bold text-slate-900">Case Overview & Clinical Context</h2>
-          <div className="space-y-3 text-xs">
-            <div>
-              <span className="text-slate-400 font-semibold uppercase">Case Name:</span>
-              <p className="text-sm font-semibold text-slate-800">{familyData?.family?.name}</p>
+        <div className="space-y-6 max-w-4xl">
+          <Card className="p-6 space-y-4">
+            <h2 className="text-base font-bold text-slate-900">Case Overview & Clinical Context</h2>
+            <div className="space-y-3 text-xs">
+              <div>
+                <span className="text-slate-400 font-semibold uppercase">Case Name:</span>
+                <p className="text-sm font-semibold text-slate-800">{familyData?.family?.name}</p>
+              </div>
+              <div>
+                <span className="text-slate-400 font-semibold uppercase">Description / Objectives:</span>
+                <p className="text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 mt-1">
+                  {familyData?.family?.description || 'No descriptive notes recorded.'}
+                </p>
+              </div>
+              <div>
+                <span className="text-slate-400 font-semibold uppercase">Status:</span>
+                <p className="text-slate-800 font-medium mt-0.5">{familyData?.family?.status}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-slate-400 font-semibold uppercase">Description / Objectives:</span>
-              <p className="text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 mt-1">
-                {familyData?.family?.description || 'No descriptive notes recorded.'}
-              </p>
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <Button onClick={() => handleStepChange(1)} size="sm">
+                Proceed to Family Members <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
             </div>
-            <div>
-              <span className="text-slate-400 font-semibold uppercase">Status:</span>
-              <p className="text-slate-800 font-medium mt-0.5">{familyData?.family?.status}</p>
+          </Card>
+
+          {/* Quick-Start Synthetic Scenarios Panel */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  Quick-Start with Syllabus-Aligned Synthetic Scenarios
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Select a pre-built clinical case to immediately test rule evaluation, forward chaining, and uncertainty handling
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Scenario A */}
+              <Card className="p-4 flex flex-col justify-between border-amber-200/60 bg-gradient-to-b from-amber-50/30 to-white hover:border-amber-400 transition-colors">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">
+                      Scenario A
+                    </span>
+                    <span className="text-[10px] text-slate-500">9 Members</span>
+                  </div>
+                  <h4 className="font-bold text-slate-900 text-xs">
+                    Autosomal Recessive & Consanguinity
+                  </h4>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Couple are 2nd cousins who both carry Cystic Fibrosis (CFTR). Brother is clinically affected.
+                  </p>
+                  <div className="pt-1 text-[10px] text-slate-400 font-mono">
+                    Fires: RULE-AR-01, RULE-CONS-01
+                  </div>
+                </div>
+                <div className="pt-3 mt-3 border-t border-slate-100">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="w-full text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200"
+                    onClick={() => handleApplyScenario('recessive_consanguinity')}
+                    loading={applyingScenario}
+                  >
+                    Load Scenario A
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Scenario B */}
+              <Card className="p-4 flex flex-col justify-between border-slate-200 hover:border-slate-400 transition-colors">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-800">
+                      Scenario B
+                    </span>
+                    <span className="text-[10px] text-slate-500">1 Member</span>
+                  </div>
+                  <h4 className="font-bold text-slate-900 text-xs">
+                    Incomplete Lineage / Adopted Proband
+                  </h4>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Proband adopted with zero biological parental records. Demonstrates open-world uncertainty.
+                  </p>
+                  <div className="pt-1 text-[10px] text-slate-400 font-mono">
+                    Fires: R09 (Insufficient Info)
+                  </div>
+                </div>
+                <div className="pt-3 mt-3 border-t border-slate-100">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="w-full text-xs font-semibold"
+                    onClick={() => handleApplyScenario('incomplete_lineage')}
+                    loading={applyingScenario}
+                  >
+                    Load Scenario B
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Scenario C */}
+              <Card className="p-4 flex flex-col justify-between border-indigo-200/60 bg-gradient-to-b from-indigo-50/30 to-white hover:border-indigo-400 transition-colors">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                      Scenario C
+                    </span>
+                    <span className="text-[10px] text-slate-500">7 Members</span>
+                  </div>
+                  <h4 className="font-bold text-slate-900 text-xs">
+                    Huntington Lineage & Parental Age
+                  </h4>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Vertical dominant transmission across 3 generations + maternal age 38 + paternal age 44.
+                  </p>
+                  <div className="pt-1 text-[10px] text-slate-400 font-mono">
+                    Fires: RULE-AD-01, AMA, APA, R04, R08
+                  </div>
+                </div>
+                <div className="pt-3 mt-3 border-t border-slate-100">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="w-full text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200"
+                    onClick={() => handleApplyScenario('dominant_multirule')}
+                    loading={applyingScenario}
+                  >
+                    Load Scenario C
+                  </Button>
+                </div>
+              </Card>
             </div>
           </div>
-          <div className="pt-4 border-t border-slate-100 flex justify-end">
-            <Button onClick={() => handleStepChange(1)} size="sm">
-              Proceed to Family Members <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-        </Card>
+        </div>
       )}
 
       {/* --- STEP 1: MEMBERS --- */}
@@ -346,17 +641,40 @@ export const FamilyBuilder = () => {
               <h2 className="text-base font-bold text-slate-900">Family Members ({members.length})</h2>
               <p className="text-xs text-slate-500">Record all individuals across maternal and paternal lines</p>
             </div>
-            <Button onClick={() => setShowMemberModal(true)} size="sm">
-              <Plus className="w-4 h-4 mr-1" /> Add Family Member
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setShowScenarioModal(true)}>
+                <Sparkles className="w-3.5 h-3.5 mr-1 text-amber-500" /> Demo Scenarios
+              </Button>
+              <Button onClick={() => setShowMemberModal(true)} size="sm">
+                <Plus className="w-4 h-4 mr-1" /> Add Family Member
+              </Button>
+            </div>
           </div>
 
           {members.length === 0 ? (
-            <Card className="p-8 text-center space-y-2">
-              <p className="text-sm text-slate-600">No members added yet.</p>
-              <Button onClick={() => setShowMemberModal(true)} size="sm">
-                Add First Member (Proband)
-              </Button>
+            <Card className="p-8 text-center space-y-4 max-w-lg mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto">
+                <Users className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-slate-900 text-base">No Members Added Yet</h3>
+                <p className="text-xs text-slate-500">
+                  You can start manually by adding your first family member, or quick-fill a complete synthetic case to immediately test the system.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
+                <Button onClick={() => setShowMemberModal(true)} size="sm">
+                  <Plus className="w-4 h-4 mr-1" /> Add First Member (Proband)
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowScenarioModal(true)}
+                  size="sm"
+                  className="bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200"
+                >
+                  <Sparkles className="w-3.5 h-3.5 mr-1 text-amber-600" /> Quick-Fill Demo Scenario
+                </Button>
+              </div>
             </Card>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -721,13 +1039,22 @@ export const FamilyBuilder = () => {
             </>
           )}
 
-          <div className="flex justify-between pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
             <Button variant="secondary" onClick={() => handleStepChange(5)} size="sm">
               <ArrowLeft className="w-4 h-4 mr-1" /> View Pedigree
             </Button>
-            <Link to="/user/dashboard">
-              <Button size="sm">Return to Dashboard</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              {assessmentResult?._id && (
+                <Link to={`/user/assessments/${assessmentResult._id}`}>
+                  <Button variant="secondary" size="sm">
+                    View Full Explanation &amp; Audit <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </Button>
+                </Link>
+              )}
+              <Link to="/user/dashboard">
+                <Button size="sm">Return to Dashboard</Button>
+              </Link>
+            </div>
           </div>
         </div>
       )}
@@ -810,13 +1137,22 @@ export const FamilyBuilder = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" size="sm" onClick={() => setShowMemberModal(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" size="sm">
-              Save Member
-            </Button>
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={handleQuickFillMember}
+              className="text-xs text-amber-700 hover:text-amber-800 font-medium flex items-center gap-1 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 transition-colors"
+            >
+              <Sparkles className="w-3 h-3 text-amber-500" /> Fill Sample Member
+            </button>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setShowMemberModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                Save Member
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>
@@ -933,18 +1269,27 @@ export const FamilyBuilder = () => {
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
+          <div className="flex items-center justify-between pt-2">
+            <button
               type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => { setShowRelModal(false); setRelError(''); setRelSearch(''); }}
+              onClick={handleQuickFillRelationship}
+              className="text-xs text-amber-700 hover:text-amber-800 font-medium flex items-center gap-1 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 transition-colors"
             >
-              Cancel
-            </Button>
-            <Button type="submit" size="sm">
-              Establish Relationship
-            </Button>
+              <Sparkles className="w-3 h-3 text-amber-500" /> Fill Sample Relationship
+            </button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => { setShowRelModal(false); setRelError(''); setRelSearch(''); }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                Establish Relationship
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>
@@ -1026,15 +1371,110 @@ export const FamilyBuilder = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" size="sm" onClick={() => setShowCondModal(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" size="sm">
-              Link Condition
-            </Button>
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={handleQuickFillCondition}
+              className="text-xs text-amber-700 hover:text-amber-800 font-medium flex items-center gap-1 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 transition-colors"
+            >
+              <Sparkles className="w-3 h-3 text-amber-500" /> Fill Sample Condition
+            </button>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setShowCondModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                Link Condition
+              </Button>
+            </div>
           </div>
         </form>
+      </Modal>
+
+      {/* --- QUICK FILL SYNTHETIC SCENARIO MODAL --- */}
+      <Modal
+        isOpen={showScenarioModal}
+        onClose={() => setShowScenarioModal(false)}
+        title="Quick Fill Synthetic Demonstration Scenario"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-bold text-amber-950">Syllabus-Aligned AIES Clinical Benchmark</p>
+              <p className="text-amber-800 leading-relaxed">
+                Loading a synthetic scenario populates biologically consistent members, relationships, and condition records. Existing records in this case will be safely replaced.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {availableScenarios.length === 0 ? (
+              <div className="p-6 text-center text-xs text-slate-400">Loading scenarios...</div>
+            ) : (
+              availableScenarios.map(sc => (
+                <div
+                  key={sc.key}
+                  onClick={() => setSelectedScenarioKey(sc.key)}
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    selectedScenarioKey === sc.key
+                      ? 'border-brand-600 bg-brand-50/40 shadow-xs'
+                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        checked={selectedScenarioKey === sc.key}
+                        onChange={() => setSelectedScenarioKey(sc.key)}
+                        className="text-brand-600 focus:ring-brand-500"
+                      />
+                      <span className="font-bold text-slate-900 text-xs">{sc.title}</span>
+                    </div>
+                    <Badge variant={sc.key === 'incomplete_lineage' ? 'default' : 'brand'} size="sm">
+                      {sc.badge}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-5 mb-2 leading-relaxed">
+                    {sc.clinicalDescription}
+                  </p>
+                  <div className="pl-5 flex flex-wrap items-center gap-3 text-[10px] text-slate-500 border-t border-slate-100 pt-2">
+                    <span><strong>Members:</strong> {sc.memberCount}</span>
+                    <span><strong>Relationships:</strong> {sc.relationshipCount}</span>
+                    <span><strong>Conditions:</strong> {sc.conditionCount}</span>
+                    <span className="text-brand-700 font-mono"><strong>Target:</strong> {sc.expectedOutcome?.winningRule} ({sc.expectedOutcome?.category})</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <span className="text-[11px] text-slate-400">
+              {members.length > 0 ? `Replaces ${members.length} existing members` : 'Populates fresh pedigree'}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowScenarioModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                loading={applyingScenario}
+                onClick={() => handleApplyScenario(selectedScenarioKey)}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+              >
+                <Sparkles className="w-3.5 h-3.5 mr-1" /> Apply Synthetic Scenario
+              </Button>
+            </div>
+          </div>
+        </div>
       </Modal>
     </div>
   );

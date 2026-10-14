@@ -15,7 +15,8 @@ import {
   Send,
   MessageSquare,
   FileCheck2,
-  Cpu
+  Cpu,
+  Sparkles
 } from 'lucide-react';
 
 export const CaseReview = () => {
@@ -83,6 +84,29 @@ export const CaseReview = () => {
     } catch (err) {
       alert('Failed to update case status.');
     }
+  };
+
+  const handleQuickFillClinicalNote = () => {
+    const triggered = caseData?.assessments?.[0]?.triggeredRules || [];
+    const ruleCodes = triggered.map(r => r.ruleCode);
+
+    if (ruleCodes.includes('RULE-AR-01') || ruleCodes.includes('RULE-CONS-01')) {
+      setNoteText('Reviewed 3-generation pedigree. Both prospective parents are confirmed heterozygous carriers for Cystic Fibrosis (CFTR c.1521_1523delCTT). 2nd-degree consanguinity verified between partners. High baseline probability (25% recurrence risk) for clinical manifestation in offspring.');
+      setRecommendationText('1. Urgent pre-test and post-test genetic counseling with certified counselor.\n2. Discuss pre-implantation genetic diagnosis (PGT-M) and prenatal diagnostic options.\n3. Recommend targeted expanded carrier screening for extended family relatives.');
+    } else if (ruleCodes.includes('RULE-AD-01') || ruleCodes.includes('RULE-MULTI-01')) {
+      setNoteText('Pedigree confirms Autosomal Dominant vertical transmission across 3 successive generations with early-onset manifestation (<50 years) for Huntington Disease. Proband currently asymptomatic with 50% prior risk of carrying the dominant CAG repeat expansion.');
+      setRecommendationText('1. Follow established genetic counseling protocol for pre-symptomatic predictive testing.\n2. Baseline neurological evaluation.\n3. Preconception consultation regarding PGT-M or gamete donation reproductive options.');
+    } else if (ruleCodes.includes('RULE-XL-01')) {
+      setNoteText('Pedigree demonstrates classic X-linked recessive criss-cross inheritance. Maternal grandfather was affected with severe Hemophilia A (HEMA-F8). Biological mother is a confirmed carrier. Offspring transmission risks explained.');
+      setRecommendationText('1. Preconception genetic consultation regarding non-invasive prenatal fetal sex determination.\n2. Partner carrier screening for Factor VIII variants.\n3. Delivery management coordination with clinical hematology team.');
+    } else if (ruleCodes.includes('R09')) {
+      setNoteText('Proband was adopted in infancy with zero documented biological family health records. Open-world knowledge boundary applies: absence of recorded disease must not be misconstrued as low genetic risk.');
+      setRecommendationText('1. Comprehensive pan-ethnic expanded carrier screening (ECS) recommended prior to conception.\n2. Standard baseline maternal health and obstetrical evaluation.\n3. Re-evaluate if biological lineage documentation becomes accessible.');
+    } else {
+      setNoteText('Comprehensive pedigree and clinical history review completed. No high-risk Mendelian conditions, consanguineous unions, or early-onset familial disease clusters identified in recorded lineage.');
+      setRecommendationText('1. Maintain standard preconception folic acid supplementation (400 mcg daily).\n2. Standard population-level carrier screening and routine prenatal care.');
+    }
+    setStatus('REVIEWED');
   };
 
   const handleDownloadPDF = async () => {
@@ -245,9 +269,18 @@ export const CaseReview = () => {
         {/* Right: Counselor Clinical Notes Form & History */}
         <div className="space-y-4">
           <Card className="p-6 space-y-4 border-sky-200 dark:border-sky-900/60">
-            <div className="flex items-center gap-2 border-b border-sky-100 dark:border-sky-900/40 pb-3 text-sky-900 dark:text-sky-200">
-              <Stethoscope className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-              <h3 className="font-bold text-sm">Add Clinical Notes & Recommendations</h3>
+            <div className="flex items-center justify-between border-b border-sky-100 dark:border-sky-900/40 pb-3 text-sky-900 dark:text-sky-200">
+              <div className="flex items-center gap-2">
+                <Stethoscope className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <h3 className="font-bold text-sm">Add Clinical Notes & Recommendations</h3>
+              </div>
+              <button
+                type="button"
+                onClick={handleQuickFillClinicalNote}
+                className="text-xs text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 font-medium flex items-center gap-1 px-2.5 py-1 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 rounded-lg border border-sky-200 dark:border-sky-800 transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-sky-500" /> Quick-Fill Sample Note
+              </button>
             </div>
 
             <form onSubmit={handleAddNote} className="space-y-3">

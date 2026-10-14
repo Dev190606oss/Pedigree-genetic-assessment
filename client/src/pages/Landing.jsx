@@ -11,237 +11,275 @@ import {
   Stethoscope,
   User,
   Cpu,
-  HeartHandshake,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  Layers,
+  Search,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
+import { Card } from '../components/common/Card';
 
 export const Landing = () => {
   return (
-    <div className="space-y-20 pb-16">
+    <div className="space-y-16 pb-16">
       {/* Hero Section */}
-      <section className="relative pt-12 pb-16 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 dark:bg-brand-950/60 border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-xs font-semibold shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-            Preconception Health & Lineage Risk Assessment
+      <section className="pt-8 sm:pt-14 pb-12 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium">
+            <ShieldCheck className="w-3.5 h-3.5 text-brand-700 dark:text-brand-400" />
+            Clinical Preconception Decision-Support &amp; Rule-Based Expert System
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight max-w-4xl mx-auto leading-tight">
-            Evidence-Based Preconception <br />
-            <span className="bg-gradient-to-r from-brand-600 via-teal-600 to-indigo-600 dark:from-brand-400 dark:via-teal-400 dark:to-indigo-400 bg-clip-text text-transparent">
-              Family Health Guidance
-            </span>
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+            Evidence-Based Preconception Genetic Assessment &amp; Guidance
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Record multi-generational family health histories, visualize dynamic pedigrees, and explore transparent genetic risk evaluations designed to support informed conversations with your healthcare provider.
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            GeneTrace combines rigorous genealogical data modeling with a deterministic, rule-based expert system. Record multi-generational family pedigrees, evaluate Mendelian transmission patterns, and generate transparent clinical summaries to support informed conversations with healthcare professionals.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
             <Link to="/register">
-              <Button size="lg" className="shadow-lg shadow-brand-600/20">
-                Start Health Assessment <ArrowRight className="w-4 h-4 ml-1" />
+              <Button size="md" variant="primary">
+                Start Patient Assessment <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+            <Link to="/expert-system">
+              <Button size="md" variant="secondary">
+                <Cpu className="w-4 h-4 mr-1.5 text-brand-700 dark:text-brand-400" /> Open AIES Workbench
               </Button>
             </Link>
             <Link to="/about">
-              <Button variant="secondary" size="lg">
-                How It Works
+              <Button size="md" variant="ghost">
+                System Documentation
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 4 Core Clinical Pillars */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-8 space-y-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-400">
+            Platform Capabilities
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Engineered for Clinical Transparency &amp; Rigor
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Designed to bridge patient family history capture, expert system evaluation, and certified genetic counselor workflows.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-brand-700 dark:text-brand-400 flex items-center justify-center">
+              <Users className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Family Lineage Modeling</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Structured entry of biological parentage, consanguinity, carrier states, and clinical onset ages across multiple generations.
+            </p>
+          </Card>
+
+          <Card className="space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-teal-700 dark:text-teal-400 flex items-center justify-center">
+              <GitMerge className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Interactive Pedigree Chart</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Standardized clinical pedigree notation generated dynamically via D3.js with pan, zoom, and member inspector overlays.
+            </p>
+          </Card>
+
+          <Card className="space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 flex items-center justify-center">
+              <Cpu className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Deterministic AIES Engine</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Explainable production rules (IF-THEN) evaluating autosomal recessive, dominant, consanguinity, and aneuploidy indicators.
+            </p>
+          </Card>
+
+          <Card className="space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+              <FileText className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Clinical Summary Reports</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Export comprehensive PDF summary reports documenting triggered factors, counselor recommendations, and audit histories.
+            </p>
+          </Card>
+        </div>
+      </section>
+
+      {/* 3 Dedicated Role Portals */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-8 space-y-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-400">
+            Role Separation
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Dedicated Workspaces by Access Role
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Role-based access control protecting clinical integrity and sensitive pedigree records.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Patient Portal */}
+          <Card className="flex flex-col justify-between space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <Badge variant="neutral" size="sm">Patient Role</Badge>
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Patient &amp; Family Portal</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Step-by-step family builder, dynamic pedigree charts, plain-language risk evaluations, and historical report downloads.
+              </p>
+              <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-1">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-brand-700 dark:text-brand-400" /> Multi-generational lineage builder</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-brand-700 dark:text-brand-400" /> Interactive visual pedigree exploration</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-brand-700 dark:text-brand-400" /> Plain-language risk justifications</li>
+              </ul>
+            </div>
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Link to="/login" className="w-full block">
+                <Button variant="secondary" className="w-full">
+                  Sign In as Patient <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Counselor Portal */}
+          <Card className="flex flex-col justify-between space-y-4 border-slate-300 dark:border-slate-700">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-teal-700 dark:text-teal-400 flex items-center justify-center">
+                  <Stethoscope className="w-4 h-4" />
+                </div>
+                <Badge variant="brand" size="sm">Clinical Specialist</Badge>
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Genetic Counselor Portal</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Case queue triage, detailed pedigree inspector, rule trigger audit trails, case notes, and formal clinical recommendations.
+              </p>
+              <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-1">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400" /> Case queue &amp; triage management</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400" /> Clinical pedigree inspection &amp; audit</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400" /> Professional clinical notes &amp; sign-off</li>
+              </ul>
+            </div>
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Link to="/counselor/login" className="w-full block">
+                <Button variant="primary" className="w-full">
+                  Counselor Sign In <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Admin Portal */}
+          <Card className="flex flex-col justify-between space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <Badge variant="neutral" size="sm">System Admin</Badge>
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Administrator Portal</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Knowledge base rule creation and editing, hereditary condition catalog management, user accounts, and immutable audit logging.
+              </p>
+              <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-1">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" /> Production rule knowledge base manager</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" /> Hereditary conditions catalog</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" /> System security audit trail</li>
+              </ul>
+            </div>
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Link to="/admin/login" className="w-full block">
+                <Button variant="secondary" className="w-full">
+                  Admin Sign In <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* AIES Expert System Workbench Feature Box */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="p-6 sm:p-8 rounded-xl bg-slate-900 text-white border border-slate-800 space-y-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-brand-900/60 text-brand-300 border border-brand-700/50 text-[11px] font-mono">
+                <Cpu className="w-3.5 h-3.5 text-brand-400" />
+                AIES Academic Suite
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">
+                GeneTrace Expert System Workbench
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                A dedicated environment for faculty review, syllabus concept demonstrations, and live knowledge engineering inspection.
+              </p>
+            </div>
+
+            <Link to="/expert-system">
+              <Button size="md" variant="primary" className="!bg-brand-600 hover:!bg-brand-500 whitespace-nowrap">
+                Launch Workbench <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>
 
-          {/* 4 User-Centric Benefit Cards */}
-          <div className="pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto text-left">
-            {/* Card 1: Family Health History */}
-            <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
-                <Users className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Family Health History</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Easily document multi-generational medical conditions, carrier statuses, and biological relationships in one secure place.
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs pt-2 border-t border-slate-800">
+            <div className="space-y-1">
+              <span className="font-bold text-brand-400">1. Knowledge Base Explorer</span>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Filterable repository of production rules with IF-THEN predicates, AND/OR logic, and priority weights.
               </p>
             </div>
-
-            {/* Card 2: Interactive Family Tree */}
-            <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                <GitMerge className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Interactive Family Tree</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Clear visual diagrams generated using standardized pedigree notation with intuitive zoom, pan, and member inspection.
+            <div className="space-y-1">
+              <span className="font-bold text-teal-400">2. Knowledge Representation</span>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Structured predicate logic propositions, semantic network graphs, and Minsky frame representations.
               </p>
             </div>
-
-            {/* Card 3: Personalized Assessment */}
-            <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                <Activity className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Personalized Guidance</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Evidence-based preconception risk guidance categorized by severity with transparent explanations of every triggered factor.
+            <div className="space-y-1">
+              <span className="font-bold text-indigo-400">3. Multi-Pass Forward Chaining</span>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Step-by-step evaluation traces with firing rules, asserted facts, and non-firing unmet premise logs.
               </p>
             </div>
-
-            {/* Card 4: Downloadable Reports */}
-            <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                <FileText className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Downloadable Reports</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Export clinical summary reports formatted for easy sharing with genetic counselors, obstetricians, or primary physicians.
+            <div className="space-y-1">
+              <span className="font-bold text-amber-400">4. Backward Chaining &amp; XAI</span>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Goal hypothesis testing, recursive proof trees, and priority-weighted conflict resolution audits.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Three Dedicated Portals Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <Badge variant="brand" size="md">Secure Workspaces</Badge>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">
-            Tailored Experiences for Every Role
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-            Specialized portals connecting patients, certified genetic counselors, and clinical administrators.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* User Portal */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
-                <User className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Patient & Family Portal</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Build your family tree step-by-step, view clear lineage charts, generate health assessments, and download personalized reports.
-              </p>
-              <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-2">
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" /> Multi-generational lineage builder</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" /> Interactive visual pedigree exploration</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" /> Clear, plain-language risk explanations</li>
-              </ul>
-            </div>
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 mt-6">
-              <Link to="/login" className="w-full block">
-                <Button variant="secondary" className="w-full">
-                  Sign In as Patient <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Counselor Portal */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-sky-200 dark:border-sky-900/60 p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-sky-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-              Clinical
-            </div>
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                <Stethoscope className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Genetic Counselor Portal</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Review assigned patient pedigrees, inspect clinical rule evaluation results, add professional clinical recommendations, and manage case statuses.
-              </p>
-              <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-2">
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" /> Case queue & triage dashboard</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" /> Comprehensive pedigree & health review</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" /> Counselor clinical notes & recommendations</li>
-              </ul>
-            </div>
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 mt-6">
-              <Link to="/counselor/login" className="w-full block">
-                <Button variant="primary" className="w-full !bg-sky-600 hover:!bg-sky-700">
-                  Counselor Portal <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Admin Portal */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-purple-200 dark:border-purple-900/60 p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-              Governance
-            </div>
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                <Cpu className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Administrator Portal</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Maintain clinical rules, manage hereditary condition catalogs, oversee counselor assignments, and review security audit logs.
-              </p>
-              <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-2">
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> Clinical rules management & versioning</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> User and counselor administration</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> Platform audit trails & analytics</li>
-              </ul>
-            </div>
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 mt-6">
-              <Link to="/admin/login" className="w-full block">
-                <Button variant="dark" className="w-full">
-                  Admin Portal <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Flow */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-slate-900 dark:bg-slate-900 text-white rounded-3xl py-14 px-8 border border-slate-800">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <Badge variant="brand" size="md">How It Works</Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold mt-2">
-              The Assessment Journey
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2">
-              A guided experience from family history recording to clear clinical decision support.
+      {/* Non-Diagnostic Clinical Scope Disclaimer */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-start gap-3">
+          <ShieldCheck className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-0.5 leading-relaxed">
+            <strong className="text-slate-700 dark:text-slate-300">Intended Purpose &amp; Regulatory Notice:</strong>
+            <p>
+              GeneTrace is an educational and clinical decision-support tool designed to synthesize family medical history and highlight potential hereditary risks. It does not provide an autonomous medical diagnosis or genetic test replacement. Patients must review all guidance with a certified genetic counselor or qualified medical provider.
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-slate-800/80 p-6 rounded-2xl border border-slate-700/80 space-y-3">
-              <span className="text-xs font-bold text-brand-400">STEP 01</span>
-              <h4 className="font-bold text-sm">Family Lineage Builder</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Add family members, biological parents, siblings, partners, and known health conditions.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/80 p-6 rounded-2xl border border-slate-700/80 space-y-3">
-              <span className="text-xs font-bold text-brand-400">STEP 02</span>
-              <h4 className="font-bold text-sm">Interactive Pedigree</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                View dynamic family charts with standard symbols, interactive member cards, and clear relationship lines.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/80 p-6 rounded-2xl border border-slate-700/80 space-y-3">
-              <span className="text-xs font-bold text-brand-400">STEP 03</span>
-              <h4 className="font-bold text-sm">Clinical Risk Evaluation</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Family relationships and recorded conditions are evaluated against evidence-based genetic rules.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/80 p-6 rounded-2xl border border-slate-700/80 space-y-3">
-              <span className="text-xs font-bold text-brand-400">STEP 04</span>
-              <h4 className="font-bold text-sm">Guidance & PDF Report</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Access transparent justifications, counselor notes, and downloadable PDF reports for your clinical visit.
-              </p>
-            </div>
           </div>
         </div>
       </section>

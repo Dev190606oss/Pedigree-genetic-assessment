@@ -12,7 +12,7 @@ export const About = () => {
           Empowering Preconception Care Through Family Lineage
         </h1>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          PEDIGREE is a comprehensive family health history and preconception genetic assessment platform designed to turn complex hereditary patterns into clear, actionable clinical guidance.
+          GeneTrace is a comprehensive family health history and preconception genetic assessment platform designed to turn complex hereditary patterns into clear, actionable clinical guidance.
         </p>
       </div>
 
@@ -67,7 +67,7 @@ export const About = () => {
           </div>
 
           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            In healthcare decision-making, transparency is critical. PEDIGREE evaluates family health histories using deterministic, evidence-based clinical rules rather than opaque algorithms.
+            In healthcare decision-making, transparency is critical. GeneTrace evaluates family health histories using deterministic, evidence-based clinical rules rather than opaque algorithms.
           </p>
 
           <div className="space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
@@ -138,7 +138,7 @@ export const About = () => {
             <span>Role of Decision Support</span>
           </div>
           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            PEDIGREE is an educational and clinical decision-support tool. It organizes information and highlights potential risks to help you prepare for constructive conversations with certified genetic counselors and physicians.
+            GeneTrace is an educational and clinical decision-support tool. It organizes information and highlights potential risks to help you prepare for constructive conversations with certified genetic counselors and physicians.
           </p>
         </Card>
       </div>

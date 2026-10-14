@@ -68,10 +68,35 @@ async function seedData() {
     isActive: true
   });
 
+  // GeneTrace Rebranded Alias Accounts
+  await User.create({
+    name: 'GeneTrace Administrator',
+    email: 'admin@genetrace.local',
+    passwordHash: adminPasswordHash,
+    role: ROLES.ADMIN,
+    isActive: true
+  });
+
+  await User.create({
+    name: 'Dr. Sarah Chen, MS, CGC',
+    email: 'counselor@genetrace.local',
+    passwordHash: counselorPasswordHash,
+    role: ROLES.COUNSELOR,
+    isActive: true
+  });
+
+  await User.create({
+    name: 'Alex Morgan',
+    email: 'user@genetrace.local',
+    passwordHash: userPasswordHash,
+    role: ROLES.USER,
+    isActive: true
+  });
+
   console.log('[Seed] Created default users:');
-  console.log('  - Admin: admin@pedigree.local / Admin@123');
-  console.log('  - Counselor: counselor@pedigree.local / Counselor@123');
-  console.log('  - User: user@pedigree.local / User@123');
+  console.log('  - Admin: admin@genetrace.local (or admin@pedigree.local) / Admin@123');
+  console.log('  - Counselor: counselor@genetrace.local (or counselor@pedigree.local) / Counselor@123');
+  console.log('  - User: user@genetrace.local (or user@pedigree.local) / User@123');
 
   // 2. Populate Genetic Conditions Catalog
   const conditionsData = [

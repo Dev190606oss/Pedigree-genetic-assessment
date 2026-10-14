@@ -35,7 +35,7 @@ export const UserLogin = () => {
   };
 
   const handleQuickFill = () => {
-    setEmail('user@pedigree.local');
+    setEmail('user@genetrace.local');
     setPassword('User@123');
     setError('');
   };
@@ -44,16 +44,16 @@ export const UserLogin = () => {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center mx-auto shadow-md shadow-brand-600/20">
-            <Dna className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-xl bg-slate-900 dark:bg-slate-800 text-teal-400 flex items-center justify-center mx-auto border border-slate-700/50 shadow-xs">
+            <Dna className="w-5 h-5" />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Patient Portal Sign In</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Patient Portal Sign In</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Enter your credentials to access your family cases & assessments
           </p>
         </div>
 
-        <Card className="p-8 shadow-lg border-slate-200 dark:border-slate-800">
+        <Card className="p-8 shadow-xs border-slate-200 dark:border-slate-800">
           {error && <Alert type="danger" className="mb-4">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -66,8 +66,8 @@ export const UserLogin = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  placeholder="user@genetrace.local"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
               </div>
             </div>
@@ -92,7 +92,7 @@ export const UserLogin = () => {
             <button
               type="button"
               onClick={handleQuickFill}
-              className="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 dark:bg-brand-950/50 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-lg transition-colors"
+              className="text-xs text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 dark:bg-brand-950/50 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-md border border-brand-200/60 dark:border-brand-800/60 transition-colors"
             >
               <UserCheck className="w-3.5 h-3.5" /> Quick-Fill Demo Patient Account
             </button>

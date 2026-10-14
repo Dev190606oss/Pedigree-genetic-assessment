@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Alert } from '../../components/common/Alert';
-import { ClipboardList, ArrowRight, Search, Filter } from 'lucide-react';
+import { Modal } from '../../components/common/Modal';
+import { ClipboardList, ArrowRight, Search, Filter, Sparkles } from 'lucide-react';
 
 export const AssignedCases = () => {
+  const navigate = useNavigate();
   const [cases, setCases] = useState([]);
   const [filter, setFilter] = useState('ALL');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showScenarioModal, setShowScenarioModal] = useState(false);
+  const [quickFilling, setQuickFilling] = useState(false);
 
   useEffect(() => {
     const fetchCases = async () => {
@@ -39,6 +43,21 @@ export const AssignedCases = () => {
     return matchesFilter && matchesSearch;
   });
 
+  const handleQuickFillCase = async (scenarioKey) => {
+    setQuickFilling(true);
+    try {
+      const res = await api.post('/counselor/quick-fill-case', { scenarioKey });
+      if (res.data?.success && res.data.data?.familyId) {
+        navigate(`/counselor/cases/${res.data.data.familyId}`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to prepare demo review case.');
+    } finally {
+      setQuickFilling(false);
+      setShowScenarioModal(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -49,21 +68,32 @@ export const AssignedCases = () => {
           </p>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-          {['ALL', 'PENDING', 'IN_REVIEW', 'REVIEWED', 'COMPLETED'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                filter === status
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {status.replace(/_/g, ' ')}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowScenarioModal(true)}
+            className="border-sky-200 text-sky-800 hover:bg-sky-50"
+          >
+            <Sparkles className="w-4 h-4 mr-1.5 text-amber-500" /> Quick-Fill Demo Case
+          </Button>
+
+          {/* Filter Tabs */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+            {['ALL', 'PENDING', 'IN_REVIEW', 'REVIEWED', 'COMPLETED'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${
+                  filter === status
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {status.replace(/_/g, ' ')}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -142,6 +172,69 @@ export const AssignedCases = () => {
           </div>
         )}
       </Card>
+
+      {/* Quick Fill Scenario Modal */}
+      <Modal
+        isOpen={showScenarioModal}
+        onClose={() => setShowScenarioModal(false)}
+        title="Quick Fill Demo Patient Case for Review"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-slate-500">
+            Select a verified clinical demonstration pedigree to assign to your counselor queue. GeneTrace will prepare the family case and execute the symbolic AIES assessment engine so you can inspect the reasoning trace and document clinical notes.
+          </p>
+
+          <div className="space-y-2">
+            {[
+              {
+                key: 'recessive_consanguinity',
+                title: 'Scenario A: Autosomal Recessive & Consanguinity (Cystic Fibrosis)',
+                desc: 'Consanguineous union (2nd cousins), both CFTR carriers, affected brother. Triggers RULE-AR-01 (Priority 100, CRITICAL) and RULE-CONS-01.'
+              },
+              {
+                key: 'dominant_multirule',
+                title: 'Scenario B: Multi-Generational Huntington & Parental Age',
+                desc: 'Vertical transmission across 3 generations with early onset (<50), maternal age 38, paternal age 44. Triggers RULE-AD-01, RULE-MULTI-01, RULE-AMA-01, RULE-APA-01.'
+              },
+              {
+                key: 'x_linked_recessive',
+                title: 'Scenario C: X-Linked Recessive Hemophilia Lineage',
+                desc: 'Maternal grandfather affected with Hemophilia A, carrier mother, male proband. Triggers RULE-XL-01 (Priority 92).'
+              },
+              {
+                key: 'incomplete_lineage',
+                title: 'Scenario D: Incomplete Lineage / Adopted Proband (Uncertainty)',
+                desc: 'Adopted proband with zero biological family records. Triggers Rule R09 (INSUFFICIENT_INFORMATION).'
+              }
+            ].map(sc => (
+              <button
+                key={sc.key}
+                type="button"
+                disabled={quickFilling}
+                onClick={() => handleQuickFillCase(sc.key)}
+                className="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 transition-all flex flex-col gap-1 disabled:opacity-50"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-slate-900">{sc.title}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-sky-600" />
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">{sc.desc}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-slate-100">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowScenarioModal(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

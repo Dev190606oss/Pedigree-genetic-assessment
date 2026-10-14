@@ -36,10 +36,13 @@ const assessmentSchema = new mongoose.Schema(
         passNumber: Number,
         rulesEvaluated: Number,
         rulesTriggered: [String],
-        newFactsDerived: mongoose.Schema.Types.Mixed
+        newFactsDerived: mongoose.Schema.Types.Mixed,
+        evaluatedRules: [{ type: mongoose.Schema.Types.Mixed }]
       }],
-      totalPasses: Number
+      totalPasses: Number,
+      conflictResolution: { type: mongoose.Schema.Types.Mixed }
     },
+    conflictResolution: { type: mongoose.Schema.Types.Mixed },
     backwardChaining: {
       goal: String,
       targetValue: mongoose.Schema.Types.Mixed,

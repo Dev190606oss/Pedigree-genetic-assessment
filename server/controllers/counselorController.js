@@ -1,6 +1,8 @@
-const { CounselorAssignment, CounselorNote, Family, FamilyMember, Relationship, FamilyMemberCondition, Assessment, Notification } = require('../models');
+const { User, CounselorAssignment, CounselorNote, Family, FamilyMember, Relationship, FamilyMemberCondition, Assessment, Notification } = require('../models');
 const { CASE_STATUSES, NOTIFICATION_TYPES } = require('../constants');
 const { logAudit } = require('../middleware/audit');
+const { applyQuickFill } = require('../services/quickFillService');
+const { executeAssessment } = require('../services/assessmentService');
 
 const getAssignedCases = async (req, res, next) => {
   try {
@@ -183,10 +185,88 @@ const getCounselorStats = async (req, res, next) => {
   }
 };
 
+const quickFillCase = async (req, res, next) => {
+  try {
+    const { scenarioKey = 'recessive_consanguinity' } = req.body;
+
+    // Find a demo patient user to associate the synthetic case with
+    let demoPatient = await User.findOne({ email: 'user@genetrace.local' });
+    if (!demoPatient) {
+      demoPatient = await User.findOne({ role: 'USER' });
+    }
+    if (!demoPatient) {
+      return res.status(400).json({ success: false, error: 'No patient user found to associate synthetic case with.' });
+    }
+
+    // Find or create synthetic demonstration family for counselor review
+    let family = await Family.findOne({
+      ownerId: demoPatient._id,
+      name: { $regex: /\[Synthetic Demo\]/i }
+    });
+
+    if (!family) {
+      family = await Family.create({
+        ownerId: demoPatient._id,
+        name: '[Synthetic Demo] Clinical Counselor Review Case',
+        description: 'Synthetic demonstration case for clinical genetic counselor evaluation and note-taking.',
+        status: 'ACTIVE'
+      });
+    }
+
+    // Apply the chosen synthetic scenario
+    await applyQuickFill(family._id, scenarioKey, req.user);
+
+    // Execute real AIES assessment so the case has clinical rule findings
+    const assessmentResult = await executeAssessment(family._id, demoPatient._id);
+
+    // Create or update counselor assignment to current counselor
+    let assignment = await CounselorAssignment.findOne({
+      familyId: family._id,
+      counselorId: req.user._id
+    });
+
+    if (!assignment) {
+      assignment = await CounselorAssignment.create({
+        familyId: family._id,
+        counselorId: req.user._id,
+        assignedBy: req.user._id,
+        status: CASE_STATUSES.IN_REVIEW
+      });
+    } else {
+      assignment.status = CASE_STATUSES.IN_REVIEW;
+      assignment.updatedAt = new Date();
+      await assignment.save();
+    }
+
+    await logAudit({
+      actorId: req.user._id,
+      action: 'COUNSELOR_DEMO_CASE_QUICK_FILLED',
+      entityType: 'CounselorAssignment',
+      entityId: assignment._id,
+      metadata: { familyId: family._id, scenarioKey }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Demonstration case successfully prepared and assigned for clinical review.',
+      data: {
+        familyId: family._id,
+        familyName: family.name,
+        assignmentId: assignment._id,
+        scenarioKey,
+        assessmentCategory: assessmentResult?.resultCategory
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getAssignedCases,
   getCaseDetails,
   addNote,
   updateCaseStatus,
-  getCounselorStats
+  getCounselorStats,
+  quickFillCase
 };

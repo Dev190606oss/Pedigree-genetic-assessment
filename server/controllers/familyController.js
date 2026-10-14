@@ -6,6 +6,11 @@ const {
   normalizeRelationshipRecord,
   deriveAllRelationships
 } = require('../utils/relationshipHelper');
+const {
+  getQuickFillScenarios,
+  applyQuickFill,
+  resetFamilyCase
+} = require('../services/quickFillService');
 
 // Helper to check family ownership/access
 const checkFamilyAccess = async (familyId, user) => {
@@ -367,6 +372,32 @@ const deleteMemberCondition = async (req, res, next) => {
   }
 };
 
+// --- QUICK FILL & SCENARIOS ---
+
+const getScenarios = (req, res) => {
+  const scenarios = getQuickFillScenarios();
+  res.json({ success: true, count: scenarios.length, data: scenarios });
+};
+
+const quickFill = async (req, res, next) => {
+  try {
+    const { scenarioKey = 'recessive_consanguinity' } = req.body;
+    const result = await applyQuickFill(req.params.id, scenarioKey, req.user);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resetFamily = async (req, res, next) => {
+  try {
+    const result = await resetFamilyCase(req.params.id, req.user);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getFamilies,
   createFamily,
@@ -379,5 +410,8 @@ module.exports = {
   addRelationship,
   deleteRelationship,
   addMemberCondition,
-  deleteMemberCondition
+  deleteMemberCondition,
+  getScenarios,
+  quickFill,
+  resetFamily
 };

@@ -95,7 +95,17 @@ const login = async (req, res, next) => {
       });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    let user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      if (email.toLowerCase().endsWith('@genetrace.local')) {
+        const altEmail = email.toLowerCase().replace('@genetrace.local', '@pedigree.local');
+        user = await User.findOne({ email: altEmail });
+      } else if (email.toLowerCase().endsWith('@pedigree.local')) {
+        const altEmail = email.toLowerCase().replace('@pedigree.local', '@genetrace.local');
+        user = await User.findOne({ email: altEmail });
+      }
+    }
+
     if (!user) {
       return res.status(401).json({
         success: false,

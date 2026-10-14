@@ -28,8 +28,8 @@ async function generateAssessmentPDF(assessmentId) {
       size: 'A4',
       margin: 40,
       info: {
-        Title: `Pedigree Assessment Report - ${family.name}`,
-        Author: 'PEDIGREE Genetic Assessment Platform',
+        Title: `GeneTrace Assessment Report - ${family.name}`,
+        Author: 'GeneTrace Genetic Assessment Platform',
         Subject: 'Preconception Genetic Decision-Support Report'
       }
     });
@@ -57,7 +57,7 @@ async function generateAssessmentPDF(assessmentId) {
     // --- TITLE / COVER SECTION ---
     doc.rect(40, 40, 515, 60).fill('#0f172a');
     doc.fillColor('#ffffff').fontSize(20).font('Helvetica-Bold')
-       .text('PEDIGREE ASSESSMENT REPORT', 55, 52);
+       .text('GENETRACE ASSESSMENT REPORT', 55, 52);
     doc.fontSize(10).font('Helvetica')
        .text('Preconception Genetic Assessment and Guidance Platform | AIES Decision Support', 55, 78);
 
@@ -209,7 +209,7 @@ async function generateAssessmentPDF(assessmentId) {
     if (doc.y > 680) doc.addPage();
     doc.rect(40, doc.y, 515, 55).fill('#f1f5f9');
     doc.fillColor('#64748b').fontSize(8).font('Helvetica-Bold')
-       .text('ACADEMIC DECISION SUPPORT DISCLAIMER', 50, doc.y + 8);
+       .text('CLINICAL DECISION SUPPORT & REGULATORY NOTICE', 50, doc.y + 8);
     doc.font('Helvetica').text(assessment.disclaimer, 50, doc.y + 4, { width: 495 });
 
     doc.end();

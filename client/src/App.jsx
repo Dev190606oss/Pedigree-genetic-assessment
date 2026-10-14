@@ -14,6 +14,7 @@ import { AdminLayout } from './layouts/AdminLayout';
 // Public & Auth Pages
 import { Landing } from './pages/Landing';
 import { About } from './pages/About';
+import { ExpertSystemStudio } from './pages/expertSystem/ExpertSystemStudio';
 import { UserLogin } from './pages/auth/UserLogin';
 import { UserRegister } from './pages/auth/UserRegister';
 import { CounselorLogin } from './pages/auth/CounselorLogin';
@@ -53,6 +54,7 @@ export function App() {
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<Landing />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/expert-system" element={<ExpertSystemStudio />} />
                 <Route path="/login" element={<UserLogin />} />
                 <Route path="/register" element={<UserRegister />} />
                 <Route path="/counselor/login" element={<CounselorLogin />} />

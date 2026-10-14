@@ -13,11 +13,17 @@ const {
   addRelationship,
   deleteRelationship,
   addMemberCondition,
-  deleteMemberCondition
+  deleteMemberCondition,
+  getScenarios,
+  quickFill,
+  resetFamily
 } = require('../controllers/familyController');
 
 // All family routes require authentication
 router.use(authenticate);
+
+// Scenarios catalog for Quick Fill
+router.get('/quick-fill-scenarios', getScenarios);
 
 // Families CRUD
 router.get('/', getFamilies);
@@ -25,6 +31,10 @@ router.post('/', createFamily);
 router.get('/:id', getFamilyById);
 router.patch('/:id', updateFamily);
 router.delete('/:id', deleteFamily);
+
+// Case Quick-Fill and Reset
+router.post('/:id/quick-fill', quickFill);
+router.post('/:id/reset', resetFamily);
 
 // Members
 router.post('/:id/members', addMember);

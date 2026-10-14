@@ -4,7 +4,7 @@ import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Alert } from '../../components/common/Alert';
-import { UserCheck, Stethoscope, Users, CheckCircle2 } from 'lucide-react';
+import { UserCheck, Stethoscope, Users, CheckCircle2, Sparkles } from 'lucide-react';
 
 export const CaseAssignments = () => {
   const [families, setFamilies] = useState([]);
@@ -13,6 +13,12 @@ export const CaseAssignments = () => {
   const [selectedCounselor, setSelectedCounselor] = useState('');
   const [loading, setLoading] = useState(true);
   const [successMsg, setSuccessMsg] = useState('');
+
+  const handleQuickFillAssignment = () => {
+    if (families.length > 0) setSelectedFamily(families[0]._id);
+    if (counselors.length > 0) setSelectedCounselor(counselors[0]._id);
+    setError('');
+  };
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -113,7 +119,14 @@ export const CaseAssignments = () => {
             </select>
           </div>
 
-          <div className="pt-2 flex justify-end">
+          <div className="pt-2 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handleQuickFillAssignment}
+              className="text-xs text-purple-700 dark:text-purple-300 font-medium flex items-center gap-1.5 px-3 py-2 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 rounded-xl border border-purple-200 dark:border-purple-800 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-500" /> Quick-Fill Sample Assignment
+            </button>
             <Button
               type="submit"
               size="md"

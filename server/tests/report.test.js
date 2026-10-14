@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 const request = require('supertest');
 const { app } = require('../server');
@@ -6,7 +7,6 @@ const { Assessment, User } = require('../models');
 
 describe('PEDIGREE PDF Report Generation', () => {
   beforeAll(async () => {
-    process.env.NODE_ENV = 'test';
     await connectDB();
   });
 

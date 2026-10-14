@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 const request = require('supertest');
 const { app } = require('../server');
@@ -6,7 +7,6 @@ const { User } = require('../models');
 
 describe('PEDIGREE Authentication & RBAC API', () => {
   beforeAll(async () => {
-    process.env.NODE_ENV = 'test';
     await connectDB();
   });
 
@@ -118,5 +118,67 @@ describe('PEDIGREE Authentication & RBAC API', () => {
     expect(adminRes.status).toBe(200);
     expect(adminRes.body.success).toBe(true);
     expect(adminRes.body.data.length).toBeGreaterThan(0);
+  });
+
+  it('authenticates all three role demo accounts using @genetrace.local domain', async () => {
+    // 1. Client demo account
+    const clientRes = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: 'user@genetrace.local',
+        password: 'User@123'
+      });
+    expect(clientRes.status).toBe(200);
+    expect(clientRes.body.user.role).toBe('USER');
+    expect(clientRes.body.token).toBeDefined();
+
+    // 2. Counselor demo account
+    const counselorRes = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: 'counselor@genetrace.local',
+        password: 'Counselor@123',
+        requiredRole: 'COUNSELOR'
+      });
+    expect(counselorRes.status).toBe(200);
+    expect(counselorRes.body.user.role).toBe('COUNSELOR');
+    expect(counselorRes.body.token).toBeDefined();
+
+    // 3. Admin demo account
+    const adminRes = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: 'admin@genetrace.local',
+        password: 'Admin@123',
+        requiredRole: 'ADMIN'
+      });
+    expect(adminRes.status).toBe(200);
+    expect(adminRes.body.user.role).toBe('ADMIN');
+    expect(adminRes.body.token).toBeDefined();
+  });
+
+  it('allows counselors to quick-fill a demo case via POST /api/counselor/quick-fill-case', async () => {
+    const counselorLogin = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: 'counselor@genetrace.local',
+        password: 'Counselor@123',
+        requiredRole: 'COUNSELOR'
+      });
+
+    const counselorToken = counselorLogin.body.token;
+
+    const quickFillRes = await request(app)
+      .post('/api/counselor/quick-fill-case')
+      .set('Authorization', `Bearer ${counselorToken}`)
+      .send({
+        scenarioKey: 'recessive_consanguinity'
+      });
+
+    expect(quickFillRes.status).toBe(201);
+    expect(quickFillRes.body.success).toBe(true);
+    expect(quickFillRes.body.data.familyId).toBeDefined();
+    expect(quickFillRes.body.data.assignmentId).toBeDefined();
+    expect(quickFillRes.body.data.assessmentCategory).toBeDefined();
   });
 });

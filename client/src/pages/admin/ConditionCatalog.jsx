@@ -5,7 +5,7 @@ import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Modal } from '../../components/common/Modal';
 import { Alert } from '../../components/common/Alert';
-import { BookOpen, Plus, Trash2, Edit3 } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Edit3, Sparkles } from 'lucide-react';
 
 export const ConditionCatalog = () => {
   const [conditions, setConditions] = useState([]);
@@ -43,6 +43,13 @@ export const ConditionCatalog = () => {
     setDescription('');
     setCategory('AUTOSOMAL_RECESSIVE');
     setShowModal(true);
+  };
+
+  const handleQuickFillCondition = () => {
+    setName('Fragile X Syndrome');
+    setCode('FXS-FMR1');
+    setCategory('X_LINKED');
+    setDescription('Trinucleotide CGG repeat expansion disorder in the FMR1 gene, leading to developmental delay and intellectual impairment.');
   };
 
   const handleOpenEdit = (c) => {
@@ -211,13 +218,24 @@ export const ConditionCatalog = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" size="sm" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" size="sm">
-              Save Condition
-            </Button>
+          <div className="flex items-center justify-between pt-2">
+            {!editingCond ? (
+              <button
+                type="button"
+                onClick={handleQuickFillCondition}
+                className="text-xs text-brand-700 hover:text-brand-800 font-medium flex items-center gap-1 px-2.5 py-1 bg-brand-50 hover:bg-brand-100 rounded-lg border border-brand-200 transition-colors"
+              >
+                <Sparkles className="w-3 h-3 text-brand-500" /> Fill Sample Condition
+              </button>
+            ) : <div />}
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                Save Condition
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>

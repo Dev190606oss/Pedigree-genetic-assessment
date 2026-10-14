@@ -1,13 +1,14 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { Navbar } from './Navbar';
-import { LayoutDashboard, Users, History, Settings, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, Users, History, Settings, PlusCircle, Cpu } from 'lucide-react';
 
 export const UserLayout = () => {
   const navItems = [
     { to: '/user/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/user/families', label: 'My Family Cases', icon: Users },
     { to: '/user/history', label: 'Assessment History', icon: History },
+    { to: '/expert-system', label: 'AIES Analysis Studio', icon: Cpu },
     { to: '/user/profile', label: 'Profile & Settings', icon: Settings },
   ];
 

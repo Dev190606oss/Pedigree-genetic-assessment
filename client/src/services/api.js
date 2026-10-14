@@ -25,7 +25,13 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Clear token if expired or invalid
       const currentPath = window.location.pathname;
-      if (!currentPath.includes('/login') && !currentPath.includes('/register') && currentPath !== '/') {
+      if (
+        !currentPath.includes('/login') &&
+        !currentPath.includes('/register') &&
+        !currentPath.includes('/expert-system') &&
+        !currentPath.includes('/about') &&
+        currentPath !== '/'
+      ) {
         localStorage.removeItem('pedigree_token');
         localStorage.removeItem('pedigree_user');
         window.location.href = '/login';

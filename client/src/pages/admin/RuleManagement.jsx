@@ -20,6 +20,7 @@ export const RuleManagement = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('MENDELIAN');
   const [priority, setPriority] = useState(50);
+  const [conditionLogic, setConditionLogic] = useState('AND');
   const [resultCategory, setResultCategory] = useState('REVIEW_RECOMMENDED');
   const [factName, setFactName] = useState('consanguinity_reported');
   const [operator, setOperator] = useState('EQUALS');
@@ -54,6 +55,7 @@ export const RuleManagement = () => {
     setDescription('');
     setCategory('MENDELIAN');
     setPriority(50);
+    setConditionLogic('AND');
     setResultCategory('REVIEW_RECOMMENDED');
     setFactName('consanguinity_reported');
     setOperator('EQUALS');
@@ -65,6 +67,23 @@ export const RuleManagement = () => {
     setShowModal(true);
   };
 
+  const handleQuickFillSampleRule = () => {
+    setRuleCode('RULE-CUSTOM-01');
+    setName('Advanced Maternal Age & Recessive Carrier Synthesis');
+    setDescription('Synthesizes prospective maternal age >=35 with proband carrier status to recommend structured preconception genetic counseling.');
+    setCategory('CARRIER_STATUS');
+    setPriority(75);
+    setConditionLogic('AND');
+    setFactName('maternal_age_over_35');
+    setOperator('EQUALS');
+    setTargetValue('true');
+    setConclusionFact('maternal_carrier_counseling_indicated');
+    setConclusionValue('true');
+    setResultCategory('REVIEW_RECOMMENDED');
+    setExplanation('Prospective maternal age >=35 combined with confirmed carrier status indicates elevated baseline reproductive risk, warranting structured clinical genetic counseling.');
+    setGuidanceText('Recommend preconception consultation with a certified genetic counselor.\nDiscuss non-invasive prenatal screening (cfDNA/NIPT).\nReview targeted partner carrier screening options.');
+  };
+
   const openEditModal = (rule) => {
     setEditingRuleId(rule._id);
     setRuleCode(rule.ruleCode || '');
@@ -72,6 +91,7 @@ export const RuleManagement = () => {
     setDescription(rule.description || '');
     setCategory(rule.category || 'MENDELIAN');
     setPriority(rule.priority !== undefined ? rule.priority : 50);
+    setConditionLogic(rule.conditionLogic || 'AND');
     setResultCategory(rule.result?.category || 'REVIEW_RECOMMENDED');
     
     const firstCond = (rule.conditions && rule.conditions[0]) || {};
@@ -115,6 +135,7 @@ export const RuleManagement = () => {
       description: description.trim(),
       category,
       priority: Number(priority),
+      conditionLogic: conditionLogic === 'OR' ? 'OR' : 'AND',
       conditions: [
         {
           fact: factName,
@@ -243,6 +264,9 @@ export const RuleManagement = () => {
                     <span className="text-[11px] text-slate-400">v{rule.version || 1}</span>
                     <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
                       Priority: {rule.priority}
+                    </span>
+                    <span className="text-[11px] font-semibold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded border border-brand-200/50 dark:border-brand-800/50">
+                      {rule.conditionLogic || 'AND'} Logic
                     </span>
                   </div>
                   {rule.description && (
@@ -406,9 +430,22 @@ export const RuleManagement = () => {
 
           {/* Condition Builder (IF) */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider block">
-              Conditional Premise Clause (IF)
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider block">
+                Conditional Premise Clause (IF)
+              </span>
+              <div className="flex items-center gap-1.5 text-xs">
+                <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Logic:</label>
+                <select
+                  value={conditionLogic}
+                  onChange={(e) => setConditionLogic(e.target.value)}
+                  className="px-2 py-0.5 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-brand-600 dark:text-brand-400"
+                >
+                  <option value="AND">AND (All Required)</option>
+                  <option value="OR">OR (Any Satisfied)</option>
+                </select>
+              </div>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Fact Name</label>
@@ -541,13 +578,24 @@ export const RuleManagement = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <Button type="button" variant="secondary" size="sm" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" size="sm">
-              {editingRuleId ? 'Update Rule' : 'Save Rule to Knowledge Base'}
-            </Button>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+            {!editingRuleId ? (
+              <button
+                type="button"
+                onClick={handleQuickFillSampleRule}
+                className="text-xs text-brand-700 dark:text-brand-300 hover:text-brand-800 font-medium flex items-center gap-1 px-2.5 py-1 bg-brand-50 dark:bg-brand-950/60 hover:bg-brand-100 rounded-lg border border-brand-200 dark:border-brand-800 transition-colors"
+              >
+                <Sparkles className="w-3 h-3 text-brand-500" /> Fill Sample Rule Template
+              </button>
+            ) : <div />}
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                {editingRuleId ? 'Update Rule' : 'Save Rule to Knowledge Base'}
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>

@@ -22,7 +22,7 @@ export const PublicLayout = () => {
                 <div className="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">
                   <Dna className="w-4 h-4" />
                 </div>
-                <span className="font-bold text-slate-900 dark:text-slate-100 text-sm tracking-tight">PEDIGREE</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 text-sm tracking-tight">GeneTrace</span>
               </div>
               <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-xs">
                 A modern family health history and preconception genetic assessment platform empowering families and clinical genetic counselors with transparent, evidence-based guidance.
@@ -45,6 +45,7 @@ export const PublicLayout = () => {
               <h4 className="font-semibold text-slate-900 dark:text-slate-200 mb-3 uppercase tracking-wider text-[11px]">Platform</h4>
               <ul className="space-y-2 text-slate-500 dark:text-slate-400">
                 <li><Link to="/about" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">About the Platform</Link></li>
+                <li><Link to="/expert-system" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">AIES Analysis Studio</Link></li>
                 <li>Interactive Pedigree Builder</li>
                 <li>Evidence-Based Clinical Rules</li>
                 <li>Downloadable Health Summaries</li>
@@ -55,13 +56,13 @@ export const PublicLayout = () => {
             <div>
               <h4 className="font-semibold text-slate-900 dark:text-slate-200 mb-3 uppercase tracking-wider text-[11px]">Health Notice</h4>
               <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
-                PEDIGREE provides structured risk assessments and educational guidance based on documented family history. It is designed to assist informed discussions with certified genetic counselors and healthcare providers, and does not provide an autonomous clinical diagnosis.
+                GeneTrace provides structured risk assessments and educational guidance based on documented family history. It is designed to assist informed discussions with certified genetic counselors and healthcare providers, and does not provide an autonomous clinical diagnosis.
               </p>
             </div>
           </div>
 
           <div className="border-t border-slate-100 dark:border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between text-slate-400 dark:text-slate-500 text-[11px]">
-            <p>© {new Date().getFullYear()} PEDIGREE Health Technologies. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} GeneTrace Technologies. All rights reserved.</p>
             <p className="mt-2 sm:mt-0 flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
               <ShieldCheck className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" /> Evidence-Based Decision Support
             </p>

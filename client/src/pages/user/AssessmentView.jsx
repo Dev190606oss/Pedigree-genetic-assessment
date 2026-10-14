@@ -73,7 +73,7 @@ export const AssessmentView = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `pedigree-report-${id}.pdf`);
+      link.setAttribute('download', `genetrace-assessment-report-${id}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -129,7 +129,12 @@ export const AssessmentView = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to="/expert-system">
+            <Button variant="secondary" size="sm">
+              <Cpu className="w-3.5 h-3.5 mr-1" /> AIES Studio
+            </Button>
+          </Link>
           {assessment.familyId?._id && (
             <Link to={`/user/families/${assessment.familyId._id}/pedigree`}>
               <Button variant="secondary" size="sm">
@@ -163,6 +168,19 @@ export const AssessmentView = () => {
           </p>
         </div>
       </div>
+
+      {/* Missing Information / Incomplete Lineage Warning */}
+      {factsObj.required_family_information_missing && (
+        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="font-bold">Incomplete Family Lineage Warning (Uncertainty Notice)</h4>
+            <p className="leading-relaxed">
+              Biological parental or generational health records are incomplete in this pedigree. In clinical genetics and automated expert systems, <strong>absence of recorded conditions must NOT be assumed to indicate low genetic risk</strong>. Comprehensive preconception expanded carrier screening and formal genetic counseling are advised.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 1. Information Identified (Extracted Base Facts) */}
       <Card className="p-6 space-y-4 border-slate-200 dark:border-slate-800">
@@ -300,6 +318,26 @@ export const AssessmentView = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Conflict Resolution Rationale */}
+        {(assessment.conflictResolution || inferenceTrace?.conflictResolution) && (
+          <div className="p-3.5 rounded-xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/60 text-xs space-y-1.5 mt-3">
+            <div className="flex flex-wrap items-center justify-between gap-1">
+              <span className="font-bold text-purple-900 dark:text-purple-200 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5 text-purple-600" />
+                Conflict Resolution: {(assessment.conflictResolution || inferenceTrace.conflictResolution).strategy}
+              </span>
+              {(assessment.conflictResolution || inferenceTrace.conflictResolution).winningRuleCode && (
+                <span className="font-mono font-bold text-purple-700 dark:text-purple-300 text-[11px]">
+                  Dominant Rule: [{(assessment.conflictResolution || inferenceTrace.conflictResolution).winningRuleCode}]
+                </span>
+              )}
+            </div>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+              {(assessment.conflictResolution || inferenceTrace.conflictResolution).rationale}
+            </p>
           </div>
         )}
       </Card>

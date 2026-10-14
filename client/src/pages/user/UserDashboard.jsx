@@ -77,38 +77,40 @@ export const UserDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-brand-600 via-brand-700 to-teal-800 rounded-3xl p-8 text-white shadow-lg shadow-brand-900/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-2 max-w-xl">
-          <Badge variant="default" size="sm" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-            Patient Portal
-          </Badge>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+      {/* Clinical Workspace Header */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/60">
+              Patient Clinical Record
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Welcome, {user?.name || 'Patient'}
           </h1>
-          <p className="text-xs sm:text-sm text-brand-100 leading-relaxed">
-            Record your family tree, map hereditary health conditions, and generate transparent rule-based preconception risk assessments.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Record your family history, map hereditary health conditions, and generate explainable rule-based preconception risk guidance.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           {latestFamily ? (
             <Link to={`/user/families/${latestFamily._id}/builder?step=6`}>
-              <Button size="md" className="!bg-white !text-brand-800 hover:!bg-brand-50 shadow-md">
-                <Sparkles className="w-4 h-4 mr-1.5 text-brand-600" /> Continue Assessment
+              <Button size="sm">
+                Continue Evaluation
               </Button>
             </Link>
           ) : (
             <Link to="/user/families/new">
-              <Button size="md" className="!bg-white !text-brand-800 hover:!bg-brand-50 shadow-md">
-                <PlusCircle className="w-4 h-4 mr-1.5 text-brand-600" /> Create Family Case
+              <Button size="sm">
+                <PlusCircle className="w-4 h-4 mr-1.5" /> Create Family Case
               </Button>
             </Link>
           )}
 
           {latestFamily && (
             <Link to={`/user/families/${latestFamily._id}/pedigree`}>
-              <Button size="md" variant="secondary" className="!bg-brand-800/40 !border-white/20 !text-white hover:!bg-brand-800/60">
+              <Button size="sm" variant="secondary">
                 <GitMerge className="w-4 h-4 mr-1.5" /> View Pedigree
               </Button>
             </Link>
@@ -120,45 +122,45 @@ export const UserDashboard = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
-            <Users className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 p-4 border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 flex items-center justify-center border border-brand-200/50 dark:border-brand-800/50">
+            <Users className="w-5 h-5" />
           </div>
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Family Cases</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{families.length}</p>
+            <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{families.length}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-            <Activity className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 p-4 border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center border border-indigo-200/50 dark:border-indigo-800/50">
+            <Activity className="w-5 h-5" />
           </div>
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Evaluations Run</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{recentAssessments.length}</p>
+            <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{recentAssessments.length}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-            <GitMerge className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 p-4 border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 flex items-center justify-center border border-sky-200/50 dark:border-sky-800/50">
+            <GitMerge className="w-5 h-5" />
           </div>
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Pedigree Status</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
               {latestFamily ? 'Diagram Ready' : 'Awaiting Data'}
             </p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-            <FileText className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 p-4 border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center border border-amber-200/50 dark:border-amber-800/50">
+            <FileText className="w-5 h-5" />
           </div>
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Latest Outcome</p>
-            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+            <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">
               {latestAssessment ? latestAssessment.resultCategory.replace(/_/g, ' ') : 'Not yet evaluated'}
             </p>
           </div>

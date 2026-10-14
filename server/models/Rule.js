@@ -52,6 +52,11 @@ const ruleSchema = new mongoose.Schema(
       type: [conditionRuleSchema],
       validate: [val => val.length > 0, 'At least one condition is required']
     },
+    conditionLogic: {
+      type: String,
+      enum: ['AND', 'OR'],
+      default: 'AND'
+    },
     result: {
       category: {
         type: String,

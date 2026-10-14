@@ -1,7 +1,7 @@
 const { evaluateCondition } = require('./ruleOperators');
 const { RESULT_CATEGORIES } = require('../constants');
 
-const ENGINE_VERSION = '2.0.0';
+const ENGINE_VERSION = '2.1.0';
 
 const CATEGORY_WEIGHTS = {
   [RESULT_CATEGORIES.COUNSELOR_REVIEW]: 4,
@@ -11,90 +11,148 @@ const CATEGORY_WEIGHTS = {
 };
 
 /**
- * Backward Chaining Demonstration Engine
- * Reconstructs a goal-driven explanation trace demonstrating how a specific target conclusion was established
- * @param {string} targetFact - The fact name to prove (e.g. 'professional_review_recommended')
+ * Backward Chaining Goal Investigator
+ * Proves or refutes a specific hypothesis fact by recursively checking working memory and production rules.
+ * @param {string} targetFact - The fact name to prove (e.g. 'autosomal_dominant_pattern')
  * @param {any} targetValue - The expected value (e.g. true)
  * @param {Array} allRules - Knowledge base rules
  * @param {Object} initialFacts - Base facts from family builder
  * @param {Object} derivedFacts - Facts derived during forward chaining
  * @returns {Object} Backward chaining proof trace
  */
-function demonstrateBackwardChaining(targetFact, targetValue, allRules = [], initialFacts = {}, derivedFacts = {}) {
+function evaluateBackwardChaining(targetFact, targetValue = true, allRules = [], initialFacts = {}, derivedFacts = {}) {
   const allFacts = { ...initialFacts, ...derivedFacts };
   const proofSteps = [];
   let stepCounter = 1;
+  const visited = new Set();
 
-  // Find rules that conclude targetFact === targetValue
-  function traceGoal(factName, expectedVal, visitedFacts = new Set()) {
-    if (visitedFacts.has(factName)) return true;
-    visitedFacts.add(factName);
+  function traceGoal(factName, expectedVal) {
+    const goalKey = `${factName}=${expectedVal}`;
+    if (visited.has(goalKey)) return { satisfied: true, cycleDetected: true };
+    visited.add(goalKey);
 
-    // Find rule whose conclusion matches
-    const matchingRules = allRules.filter(
-      r => r.conclusion && r.conclusion.fact === factName && r.conclusion.value === expectedVal && r.isActive !== false
+    // 1. Direct working memory check
+    const currentVal = allFacts[factName];
+    const isPresentInFacts = currentVal !== undefined && (
+      currentVal === expectedVal || Boolean(currentVal) === Boolean(expectedVal)
     );
 
-    if (matchingRules.length === 0) {
-      // Base fact check
-      const actualVal = allFacts[factName];
-      const isSatisfied = actualVal === expectedVal || (Boolean(actualVal) === Boolean(expectedVal));
-      return isSatisfied;
-    }
+    // 2. Candidate rules in KB that conclude this fact
+    const candidateRules = allRules.filter(
+      r => r.conclusion &&
+           r.conclusion.fact === factName &&
+           (r.conclusion.value === expectedVal || Boolean(r.conclusion.value) === Boolean(expectedVal)) &&
+           r.isActive !== false
+    ).sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-    // Pick the highest priority rule that established this conclusion
-    matchingRules.sort((a, b) => (b.priority || 0) - (a.priority || 0));
-    const establishingRule = matchingRules[0];
-
-    let allPremisesMet = true;
-
-    for (const cond of (establishingRule.conditions || [])) {
-      const premiseActualVal = allFacts[cond.fact];
-      const premiseSatisfied = evaluateCondition(premiseActualVal, cond.operator, cond.value);
-
-      // Check if premise was derived from an upstream rule
-      const upstreamRule = allRules.find(
-        r => r.conclusion && r.conclusion.fact === cond.fact && r.isActive !== false
-      );
-
+    if (candidateRules.length === 0) {
       proofSteps.push({
         step: stepCounter++,
-        ruleCode: establishingRule.ruleCode,
-        ruleName: establishingRule.name,
-        requiredFact: cond.fact,
-        operator: cond.operator,
-        expectedValue: cond.value,
-        actualValue: premiseActualVal !== undefined ? premiseActualVal : '(not recorded)',
-        satisfied: premiseSatisfied,
-        derivedFromRule: upstreamRule ? upstreamRule.ruleCode : null
+        goal: factName,
+        expectedValue: expectedVal,
+        actualValue: currentVal !== undefined ? currentVal : '(not present in working memory)',
+        source: 'BASE_WORKING_MEMORY',
+        satisfied: isPresentInFacts,
+        status: isPresentInFacts ? 'CONFIRMED_FROM_FACTS' : 'UNMET_BASE_FACT',
+        explanation: isPresentInFacts
+          ? `Fact '${factName}' is directly verified in working memory with value '${currentVal}'.`
+          : `Fact '${factName}' is absent or false in working memory and no rule in KB can deduce it.`
       });
+      return { satisfied: isPresentInFacts, ruleUsed: null };
+    }
 
-      if (!premiseSatisfied) {
-        allPremisesMet = false;
-      } else if (upstreamRule && !visitedFacts.has(cond.fact)) {
-        // Recursively trace upstream premises
-        traceGoal(cond.fact, cond.value, visitedFacts);
+    let goalProven = false;
+    let successfulRule = null;
+
+    for (const rule of candidateRules) {
+      const conditionLogic = (rule.conditionLogic || 'AND').toUpperCase();
+      const conditions = rule.conditions || [];
+      const premiseResults = [];
+
+      for (const cond of conditions) {
+        const condActualVal = allFacts[cond.fact];
+        const condDirectSatisfied = evaluateCondition(condActualVal, cond.operator, cond.value);
+
+        const upstreamRule = allRules.find(
+          r => r.conclusion && r.conclusion.fact === cond.fact && r.isActive !== false
+        );
+
+        let subProof = { satisfied: condDirectSatisfied };
+        if (upstreamRule && !visited.has(`${cond.fact}=${cond.value}`)) {
+          subProof = traceGoal(cond.fact, cond.value);
+        }
+
+        const premiseSatisfied = condDirectSatisfied || subProof.satisfied;
+        premiseResults.push({
+          requiredFact: cond.fact,
+          operator: cond.operator,
+          expectedValue: cond.value,
+          actualValue: condActualVal !== undefined ? condActualVal : '(not recorded)',
+          satisfied: premiseSatisfied,
+          derivedFromRule: upstreamRule ? upstreamRule.ruleCode : null
+        });
+
+        proofSteps.push({
+          step: stepCounter++,
+          ruleCode: rule.ruleCode,
+          ruleName: rule.name,
+          goal: factName,
+          requiredFact: cond.fact,
+          operator: cond.operator,
+          expectedValue: cond.value,
+          actualValue: condActualVal !== undefined ? condActualVal : '(not recorded)',
+          satisfied: premiseSatisfied,
+          derivedFromRule: upstreamRule ? upstreamRule.ruleCode : null,
+          upstreamDeduced: Boolean(upstreamRule),
+          explanation: premiseSatisfied
+            ? `Premise '${cond.fact} ${cond.operator} ${cond.value}' satisfied (actual: ${condActualVal})${upstreamRule ? ` [derived via rule ${upstreamRule.ruleCode}]` : ''}.`
+            : `Premise '${cond.fact} ${cond.operator} ${cond.value}' unmet (actual: ${condActualVal}).`
+        });
+      }
+
+      const ruleMet = conditions.length > 0 && (
+        conditionLogic === 'OR'
+          ? premiseResults.some(p => p.satisfied)
+          : premiseResults.every(p => p.satisfied)
+      );
+
+      if (ruleMet) {
+        goalProven = true;
+        successfulRule = rule;
+        break;
       }
     }
 
-    return allPremisesMet;
+    return { satisfied: goalProven || isPresentInFacts, ruleUsed: successfulRule };
   }
 
-  const isSatisfied = traceGoal(targetFact, targetValue);
+  const result = traceGoal(targetFact, targetValue);
 
   return {
     goal: targetFact,
     targetValue,
-    satisfied: isSatisfied,
-    proofSteps
+    satisfied: result.satisfied,
+    status: result.satisfied ? 'PROVEN' : 'REFUTED',
+    ruleUsed: result.ruleUsed ? (result.ruleUsed.ruleCode || result.ruleUsed.name) : null,
+    proofSteps,
+    summary: result.satisfied
+      ? `Goal hypothesis '${targetFact} = ${targetValue}' is PROVEN through knowledge base deduction and evidence.`
+      : `Goal hypothesis '${targetFact} = ${targetValue}' is REFUTED: required premises were not satisfied by available evidence.`
   };
+}
+
+/**
+ * Backward Chaining Demonstration Engine (wrapper for backward compatibility)
+ */
+function demonstrateBackwardChaining(targetFact, targetValue, allRules = [], initialFacts = {}, derivedFacts = {}) {
+  return evaluateBackwardChaining(targetFact, targetValue, allRules, initialFacts, derivedFacts);
 }
 
 /**
  * Data-Driven Multi-Pass Forward Chaining Evaluation Engine
  * @param {Object} facts - Initial normalized facts extracted by factBuilder
  * @param {Array} rules - Knowledge base rules
- * @returns {Object} Assessment outcome with inferenceTrace and backwardChaining proof
+ * @returns {Object} Assessment outcome with inferenceTrace, conflictResolution, and backwardChaining proof
  */
 function evaluateRules(facts, rules = []) {
   const activeRules = rules
@@ -117,32 +175,58 @@ function evaluateRules(facts, rules = []) {
     newDerivationsInPass = false;
     const currentPassTriggered = [];
     const currentPassDerivedFacts = {};
+    const passEvaluatedRules = [];
 
     for (const rule of activeRules) {
       const ruleCode = rule.ruleCode || rule._id?.toString() || 'RULE-CUSTOM';
       if (firedRuleCodes.has(ruleCode)) continue;
 
-      let allConditionsMet = true;
-      const matchingFacts = {};
+      const conditionLogic = (rule.conditionLogic || 'AND').toUpperCase();
+      const conditions = rule.conditions || [];
 
-      for (const cond of (rule.conditions || [])) {
+      const conditionEvaluations = conditions.map(cond => {
         const factValue = workingFacts[cond.fact];
-        const isMet = evaluateCondition(factValue, cond.operator, cond.value);
-
-        matchingFacts[cond.fact] = {
-          actualValue: factValue,
+        const satisfied = evaluateCondition(factValue, cond.operator, cond.value);
+        return {
+          fact: cond.fact,
           operator: cond.operator,
           expectedValue: cond.value,
-          satisfied: isMet
+          actualValue: factValue !== undefined ? factValue : null,
+          satisfied
         };
+      });
 
-        if (!isMet) {
-          allConditionsMet = false;
-          break;
-        }
-      }
+      const ruleTriggered = conditions.length > 0 && (
+        conditionLogic === 'OR'
+          ? conditionEvaluations.some(c => c.satisfied)
+          : conditionEvaluations.every(c => c.satisfied)
+      );
 
-      if (allConditionsMet && rule.conditions && rule.conditions.length > 0) {
+      const matchingFacts = {};
+      conditionEvaluations.forEach(c => {
+        matchingFacts[c.fact] = c;
+      });
+
+      const unmetConditions = conditionEvaluations.filter(c => !c.satisfied);
+
+      passEvaluatedRules.push({
+        ruleCode,
+        name: rule.name,
+        priority: rule.priority || 10,
+        category: rule.category || 'GENERAL',
+        conditionLogic,
+        resultCategory: rule.result?.category || RESULT_CATEGORIES.REVIEW_RECOMMENDED,
+        status: ruleTriggered ? 'TRIGGERED' : 'UNMET',
+        conditionEvaluations,
+        unmetConditions: unmetConditions.map(c => ({
+          fact: c.fact,
+          operator: c.operator,
+          expectedValue: c.expectedValue,
+          actualValue: c.actualValue
+        }))
+      });
+
+      if (ruleTriggered) {
         firedRuleCodes.add(ruleCode);
         newDerivationsInPass = true;
 
@@ -160,6 +244,7 @@ function evaluateRules(facts, rules = []) {
           version: rule.version || 1,
           priority: rule.priority || 10,
           category: rule.category || 'GENERAL',
+          conditionLogic,
           resultCategory: rule.result?.category || RESULT_CATEGORIES.REVIEW_RECOMMENDED,
           conclusion: rule.conclusion || null,
           passNumber,
@@ -177,7 +262,9 @@ function evaluateRules(facts, rules = []) {
       passNumber,
       rulesEvaluated: activeRules.length,
       rulesTriggered: currentPassTriggered,
-      newFactsDerived: currentPassDerivedFacts
+      rulesTriggeredCount: currentPassTriggered.length,
+      newFactsDerived: currentPassDerivedFacts,
+      evaluatedRules: passEvaluatedRules
     });
 
     if (currentPassTriggered.length > 0) {
@@ -187,17 +274,25 @@ function evaluateRules(facts, rules = []) {
     }
   }
 
-  // Determine dominant result category based on severity priority
-  let dominantCategory = RESULT_CATEGORIES.INFORMATIONAL;
-  let highestWeight = 0;
+  // --- Conflict Resolution & Dominant Outcome Determination ---
+  const candidateRules = triggeredRules.map(r => ({
+    ruleCode: r.ruleCode,
+    name: r.name,
+    priority: r.priority,
+    resultCategory: r.resultCategory,
+    categoryWeight: CATEGORY_WEIGHTS[r.resultCategory] || 1
+  }));
 
-  triggeredRules.forEach(r => {
-    const weight = CATEGORY_WEIGHTS[r.resultCategory] || 1;
-    if (weight > highestWeight) {
-      highestWeight = weight;
-      dominantCategory = r.resultCategory;
+  // Sort candidates by category weight descending, then by rule priority descending
+  candidateRules.sort((a, b) => {
+    if (b.categoryWeight !== a.categoryWeight) {
+      return b.categoryWeight - a.categoryWeight;
     }
+    return (b.priority || 0) - (a.priority || 0);
   });
+
+  const winningRule = candidateRules[0] || null;
+  let dominantCategory = winningRule ? winningRule.resultCategory : RESULT_CATEGORIES.INFORMATIONAL;
 
   // Fallback when no rules fired
   if (triggeredRules.length === 0) {
@@ -205,6 +300,24 @@ function evaluateRules(facts, rules = []) {
       ? RESULT_CATEGORIES.INSUFFICIENT_INFORMATION
       : RESULT_CATEGORIES.INFORMATIONAL;
   }
+
+  const conflictResolution = {
+    strategy: 'Priority-Weighted Severity Dominance with Rule Priority Tie-Breaking',
+    criteria: [
+      'Severity Precedence: COUNSELOR_REVIEW (weight 4) > REVIEW_RECOMMENDED (weight 3) > INSUFFICIENT_INFORMATION (weight 2) > INFORMATIONAL (weight 1)',
+      'Intra-Category Resolution: Higher numerical priority wins conflict among co-occurring rules in the same risk tier',
+      'Determinism Guarantee: Production rules evaluated deterministically without stochastic or heuristic divergence'
+    ],
+    candidatesEvaluated: candidateRules,
+    winningRuleCode: winningRule ? winningRule.ruleCode : null,
+    winningRuleName: winningRule ? winningRule.name : 'Default Baseline Evaluation',
+    winningCategory: dominantCategory,
+    rationale: winningRule
+      ? `Rule ${winningRule.ruleCode} ("${winningRule.name}") determined dominant outcome due to highest risk tier (${winningRule.resultCategory}, weight: ${winningRule.categoryWeight}) with priority ${winningRule.priority}.`
+      : (facts.required_family_information_missing
+          ? 'No clinical condition rules triggered, but incomplete biological lineage flagged INSUFFICIENT_INFORMATION to avoid false reassurance.'
+          : 'No abnormal genetic risk rules triggered; assigned standard baseline INFORMATIONAL outcome.')
+  };
 
   // Determine Primary Goal for Backward Chaining Demonstration
   let primaryGoalFact = 'baseline_standard_risk';
@@ -227,7 +340,7 @@ function evaluateRules(facts, rules = []) {
     primaryGoalValue = true;
   }
 
-  const backwardChainingProof = demonstrateBackwardChaining(
+  const backwardChainingProof = evaluateBackwardChaining(
     primaryGoalFact,
     primaryGoalValue,
     activeRules,
@@ -267,8 +380,10 @@ function evaluateRules(facts, rules = []) {
     derivedFacts,
     inferenceTrace: {
       passes: inferencePasses,
-      totalPasses: inferencePasses.length
+      totalPasses: inferencePasses.length,
+      conflictResolution
     },
+    conflictResolution,
     backwardChaining: backwardChainingProof,
     triggeredRules,
     guidance: Array.from(guidanceSet),
@@ -278,6 +393,7 @@ function evaluateRules(facts, rules = []) {
 
 module.exports = {
   evaluateRules,
+  evaluateBackwardChaining,
   demonstrateBackwardChaining,
   ENGINE_VERSION
 };

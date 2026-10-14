@@ -63,6 +63,36 @@ const defaultRules = [
     isActive: true
   },
   {
+    ruleCode: 'RULE-XL-01',
+    name: 'X-Linked Recessive Inheritance Pattern',
+    description: 'Triggered when family pedigree demonstrates X-linked transmission (e.g. carrier mother, affected maternal grandfather/male relatives). Male offspring have a 50% risk of being clinically affected; female offspring have a 50% risk of being carriers.',
+    category: 'MENDELIAN_X_LINKED',
+    priority: 92,
+    conditions: [
+      {
+        fact: 'x_linked_recessive_pattern',
+        operator: RULE_OPERATORS.EQUALS,
+        value: true
+      }
+    ],
+    conclusion: {
+      fact: 'x_linked_transmission_risk',
+      value: true
+    },
+    result: {
+      category: RESULT_CATEGORIES.COUNSELOR_REVIEW,
+      severity: 'HIGH'
+    },
+    explanation: 'Pedigree and genetic history demonstrate an X-linked recessive inheritance pattern (e.g., Hemophilia A or Duchenne Muscular Dystrophy). Female carriers possess a 50% probability of transmitting the pathogenic variant in each pregnancy, resulting in a 50% risk of disease manifestation for male offspring and a 50% probability of carrier status for female offspring.',
+    guidance: [
+      'Comprehensive preconception genetic counseling with a certified counselor is strongly recommended.',
+      'Offer targeted maternal carrier testing and molecular genetic validation.',
+      'Discuss reproductive options including preimplantation genetic testing (PGT-M) and non-invasive prenatal testing (NIPT) for fetal sex determination.'
+    ],
+    version: 1,
+    isActive: true
+  },
+  {
     ruleCode: 'RULE-MULTI-01',
     name: 'Multiple Affected Relatives with Early Onset',
     description: 'Triggered when two or more relatives are affected and at least one condition was diagnosed before age 50.',
@@ -217,6 +247,106 @@ const defaultRules = [
     guidance: [
       'Partner carrier screening for the same specific condition and gene is strongly indicated.',
       'Review inheritance dynamics (autosomal recessive vs. X-linked carrier implications).'
+    ],
+    version: 1,
+    isActive: true
+  },
+  {
+    ruleCode: 'RULE-AMA-01',
+    name: 'Advanced Maternal Age Assessment',
+    description: 'Triggered when prospective maternal age is >=35, associated with elevated baseline chromosomal aneuploidy probability.',
+    category: 'PARENTAL_AGE',
+    priority: 72,
+    conditionLogic: 'OR',
+    conditions: [
+      {
+        fact: 'maternal_age_over_35',
+        operator: RULE_OPERATORS.EQUALS,
+        value: true
+      },
+      {
+        fact: 'advanced_maternal_age',
+        operator: RULE_OPERATORS.EQUALS,
+        value: true
+      }
+    ],
+    conclusion: {
+      fact: 'maternal_age_guidance_indicated',
+      value: true
+    },
+    result: {
+      category: RESULT_CATEGORIES.REVIEW_RECOMMENDED,
+      severity: 'MODERATE'
+    },
+    explanation: 'Advanced maternal age (>=35 years) carries a biologically recognized progressive increase in the baseline incidence of fetal autosomal trisomies (such as Trisomy 21, 18, and 13) due to maternal meiotic non-disjunction.',
+    guidance: [
+      'Offer comprehensive preconception and early prenatal cell-free DNA (cfDNA/NIPT) screening options.',
+      'Discuss prenatal diagnostic modalities including chorionic villus sampling (CVS) and amniocentesis.',
+      'Recommend routine preconception folate supplementation and baseline aneuploidy risk counseling.'
+    ],
+    version: 1,
+    isActive: true
+  },
+  {
+    ruleCode: 'RULE-APA-01',
+    name: 'Advanced Paternal Age Assessment',
+    description: 'Triggered when prospective paternal age is >=40, associated with incremental de novo single-gene mutation frequencies.',
+    category: 'PARENTAL_AGE',
+    priority: 70,
+    conditionLogic: 'OR',
+    conditions: [
+      {
+        fact: 'paternal_age_over_40',
+        operator: RULE_OPERATORS.EQUALS,
+        value: true
+      },
+      {
+        fact: 'advanced_paternal_age',
+        operator: RULE_OPERATORS.EQUALS,
+        value: true
+      }
+    ],
+    conclusion: {
+      fact: 'paternal_age_guidance_indicated',
+      value: true
+    },
+    result: {
+      category: RESULT_CATEGORIES.REVIEW_RECOMMENDED,
+      severity: 'LOW'
+    },
+    explanation: 'Advanced paternal age (>=40 years) is associated with an incremental rate of de novo point mutations during continuous spermatogenesis, occasionally linked to rare dominant single-gene disorders.',
+    guidance: [
+      'Discuss age-related de novo mutation dynamics in paternal germline cells.',
+      'Consider targeted anatomical ultrasonography in the second trimester during pregnancy.'
+    ],
+    version: 1,
+    isActive: true
+  },
+  {
+    ruleCode: 'RULE-RPL-01',
+    name: 'Recurrent Pregnancy Loss Investigation',
+    description: 'Triggered when a history of recurrent pregnancy loss is documented, warranting parental balanced translocation investigation.',
+    category: 'OBSTETRIC_GENETICS',
+    priority: 74,
+    conditions: [
+      {
+        fact: 'recurrent_pregnancy_loss',
+        operator: RULE_OPERATORS.EQUALS,
+        value: true
+      }
+    ],
+    conclusion: {
+      fact: 'karyotyping_evaluation_indicated',
+      value: true
+    },
+    result: {
+      category: RESULT_CATEGORIES.REVIEW_RECOMMENDED,
+      severity: 'MODERATE'
+    },
+    explanation: 'Two or more pregnancy losses warrant evaluation for parental balanced chromosomal rearrangements (such as reciprocal or Robertsonian translocations) which produce segmental aneuploidy in gametes.',
+    guidance: [
+      'Recommend peripheral blood parental karyotyping to rule out balanced structural chromosomal rearrangements.',
+      'Review anatomical, endocrinological, and thrombophilia etiologies with an obstetric genetic specialist.'
     ],
     version: 1,
     isActive: true

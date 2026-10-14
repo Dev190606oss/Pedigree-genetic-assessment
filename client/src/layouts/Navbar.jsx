@@ -36,7 +36,7 @@ export const Navbar = () => {
           </div>
           <div>
             <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-              PEDIGREE
+              GeneTrace
             </span>
             <span className="hidden sm:inline-block ml-2 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
               Preconception Assessment
@@ -57,6 +57,17 @@ export const Navbar = () => {
             className={`hover:text-brand-600 dark:hover:text-brand-400 transition-colors ${location.pathname === '/about' ? 'text-brand-600 dark:text-brand-400 font-semibold' : ''}`}
           >
             About
+          </Link>
+          <Link
+            to="/expert-system"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+              location.pathname === '/expert-system'
+                ? 'bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800'
+                : 'hover:text-brand-600 dark:hover:text-brand-400 text-slate-700 dark:text-slate-200'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            AIES Studio
           </Link>
         </nav>
 

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Alert } from '../../components/common/Alert';
+import { Modal } from '../../components/common/Modal';
 import {
   ClipboardList,
   Stethoscope,
@@ -12,10 +13,12 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  FileText
+  FileText,
+  Sparkles
 } from 'lucide-react';
 
 export const CounselorDashboard = () => {
+  const navigate = useNavigate();
   const [assignedCases, setAssignedCases] = useState([]);
   const [stats, setStats] = useState({
     totalAssigned: 0,
@@ -25,6 +28,8 @@ export const CounselorDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showScenarioModal, setShowScenarioModal] = useState(false);
+  const [quickFilling, setQuickFilling] = useState(false);
 
   useEffect(() => {
     const fetchCases = async () => {
@@ -54,50 +59,77 @@ export const CounselorDashboard = () => {
     fetchCases();
   }, []);
 
+  const handleQuickFillCase = async (scenarioKey) => {
+    setQuickFilling(true);
+    try {
+      const res = await api.post('/counselor/quick-fill-case', { scenarioKey });
+      if (res.data?.success && res.data.data?.familyId) {
+        navigate(`/counselor/cases/${res.data.data.familyId}`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to prepare demo review case.');
+    } finally {
+      setQuickFilling(false);
+      setShowScenarioModal(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* Clinical Header */}
-      <div className="bg-gradient-to-r from-sky-700 via-sky-800 to-slate-900 rounded-3xl p-8 text-white shadow-lg shadow-sky-900/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-2 max-w-xl">
-          <Badge variant="default" size="sm" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-            Clinical Triage Workspace
-          </Badge>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+      {/* Clinical Provider Workspace Header */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60">
+              Clinical Triage Workspace
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Genetic Counselor Portal
           </h1>
-          <p className="text-xs sm:text-sm text-sky-100 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
             Review patient pedigrees, examine evidence-based clinical rule outcomes, and provide personalized clinical recommendations.
           </p>
         </div>
 
-        <Link to="/counselor/cases">
-          <Button size="md" className="!bg-white !text-sky-900 hover:!bg-sky-50 shadow-md">
-            <ClipboardList className="w-4 h-4 mr-1.5 text-sky-700" /> View Case Queue
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowScenarioModal(true)}
+            className="border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/50"
+          >
+            <Sparkles className="w-4 h-4 mr-1.5 text-amber-500" /> Quick-Fill Demo Case
           </Button>
-        </Link>
+          <Link to="/counselor/cases">
+            <Button size="sm">
+              <ClipboardList className="w-4 h-4 mr-1.5" /> View Case Queue
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {error && <Alert type="danger">{error}</Alert>}
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
-          <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 flex items-center justify-center">
-            <ClipboardList className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 p-4 border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 flex items-center justify-center border border-sky-200/50 dark:border-sky-800/50">
+            <ClipboardList className="w-5 h-5" />
           </div>
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Assigned</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.totalAssigned}</p>
+            <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{stats.totalAssigned}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5 border-slate-200 dark:border-slate-800">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center">
-            <Clock className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 p-4 border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center border border-amber-200/50 dark:border-amber-800/50">
+            <Clock className="w-5 h-5" />
           </div>
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Pending Review</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.pendingCases}</p>
+            <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{stats.pendingCases}</p>
           </div>
         </Card>
 
@@ -145,6 +177,16 @@ export const CounselorDashboard = () => {
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
               New patient cases will appear here once assigned by system administration.
             </p>
+            <div className="pt-2">
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => setShowScenarioModal(true)}
+                className="!bg-sky-600 hover:!bg-sky-700"
+              >
+                <Sparkles className="w-4 h-4 mr-1.5 text-amber-300" /> Quick-Fill Demo Review Case
+              </Button>
+            </div>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -185,6 +227,69 @@ export const CounselorDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Quick Fill Scenario Modal */}
+      <Modal
+        isOpen={showScenarioModal}
+        onClose={() => setShowScenarioModal(false)}
+        title="Quick Fill Demo Patient Case for Review"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Select a verified clinical demonstration pedigree to assign to your counselor queue. GeneTrace will prepare the family case and execute the symbolic AIES assessment engine so you can inspect the reasoning trace and document clinical notes.
+          </p>
+
+          <div className="space-y-2">
+            {[
+              {
+                key: 'recessive_consanguinity',
+                title: 'Scenario A: Autosomal Recessive & Consanguinity (Cystic Fibrosis)',
+                desc: 'Consanguineous union (2nd cousins), both CFTR carriers, affected brother. Triggers RULE-AR-01 (Priority 100, CRITICAL) and RULE-CONS-01.'
+              },
+              {
+                key: 'dominant_multirule',
+                title: 'Scenario B: Multi-Generational Huntington & Parental Age',
+                desc: 'Vertical transmission across 3 generations with early onset (<50), maternal age 38, paternal age 44. Triggers RULE-AD-01, RULE-MULTI-01, RULE-AMA-01, RULE-APA-01.'
+              },
+              {
+                key: 'x_linked_recessive',
+                title: 'Scenario C: X-Linked Recessive Hemophilia Lineage',
+                desc: 'Maternal grandfather affected with Hemophilia A, carrier mother, male proband. Triggers RULE-XL-01 (Priority 92).'
+              },
+              {
+                key: 'incomplete_lineage',
+                title: 'Scenario D: Incomplete Lineage / Adopted Proband (Uncertainty)',
+                desc: 'Adopted proband with zero biological family records. Triggers Rule R09 (INSUFFICIENT_INFORMATION).'
+              }
+            ].map(sc => (
+              <button
+                key={sc.key}
+                type="button"
+                disabled={quickFilling}
+                onClick={() => handleQuickFillCase(sc.key)}
+                className="w-full text-left p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-sky-500 hover:bg-sky-50/50 dark:hover:bg-sky-950/40 transition-all flex flex-col gap-1 disabled:opacity-50"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-slate-900 dark:text-slate-100">{sc.title}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">{sc.desc}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowScenarioModal(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

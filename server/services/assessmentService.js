@@ -18,6 +18,8 @@ async function executeAssessment(familyId, userId) {
     throw new Error('Family not found');
   }
 
+  const effectiveUserId = userId || family.ownerId;
+
   const members = await FamilyMember.find({ familyId });
   const relationships = await Relationship.find({ familyId }).populate('fromMemberId toMemberId');
   const conditions = await FamilyMemberCondition.find({ familyId }).populate('conditionId memberId');
@@ -69,11 +71,12 @@ async function executeAssessment(familyId, userId) {
   // 6. Create assessment record
   const assessment = await Assessment.create({
     familyId: family._id,
-    userId,
+    userId: effectiveUserId,
     inputSnapshot,
     facts,
     derivedFacts: evaluationResult.derivedFacts,
     inferenceTrace: evaluationResult.inferenceTrace,
+    conflictResolution: evaluationResult.conflictResolution || evaluationResult.inferenceTrace?.conflictResolution,
     backwardChaining: evaluationResult.backwardChaining,
     triggeredRules: evaluationResult.triggeredRules,
     resultCategory: evaluationResult.resultCategory,

@@ -6,7 +6,7 @@ import { Card } from '../../components/common/Card';
 import { Alert } from '../../components/common/Alert';
 import { PasswordInput } from '../../components/common/PasswordInput';
 import { getFriendlyErrorMessage } from '../../utils/errorHandler';
-import { Dna, Mail, User, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Dna, Mail, User, ArrowRight, ShieldCheck, UserCheck } from 'lucide-react';
 
 export const UserRegister = () => {
   const [name, setName] = useState('');
@@ -17,6 +17,14 @@ export const UserRegister = () => {
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const handleQuickFill = () => {
+    const rand = Math.floor(100 + Math.random() * 900);
+    setName(`Demo Patient ${rand}`);
+    setEmail(`demo.patient${rand}@genetrace.local`);
+    setPassword('Patient@123');
+    setConfirmPassword('Patient@123');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,16 +54,16 @@ export const UserRegister = () => {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center mx-auto shadow-md shadow-brand-600/20">
-            <Dna className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-xl bg-slate-900 dark:bg-slate-800 text-teal-400 flex items-center justify-center mx-auto border border-slate-700/50 shadow-xs">
+            <Dna className="w-5 h-5" />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Create Patient Account</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Create Patient Account</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Sign up to record your family history and receive preconception genetic risk guidance
           </p>
         </div>
 
-        <Card className="p-8 shadow-lg border-slate-200 dark:border-slate-800">
+        <Card className="p-8 shadow-xs border-slate-200 dark:border-slate-800">
           {error && <Alert type="danger" className="mb-4">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,7 +77,7 @@ export const UserRegister = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Alex Morgan"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
               </div>
             </div>
@@ -84,7 +92,7 @@ export const UserRegister = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
               </div>
             </div>
@@ -109,7 +117,7 @@ export const UserRegister = () => {
               />
             </div>
 
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/80 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/80 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
               <ShieldCheck className="w-4 h-4 text-brand-600 dark:text-brand-400 flex-shrink-0" />
               <span>Standard Patient Account. Counselor and Admin accounts are provisioned securely by clinical administration.</span>
             </div>
@@ -118,6 +126,17 @@ export const UserRegister = () => {
               Create Account <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </form>
+
+          {/* Quick Demo Fill Button */}
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
+            <button
+              type="button"
+              onClick={handleQuickFill}
+              className="text-xs text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 dark:bg-brand-950/50 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-md border border-brand-200/60 dark:border-brand-800/60 transition-colors"
+            >
+              <UserCheck className="w-3.5 h-3.5" /> Quick-Fill New Demo Registration
+            </button>
+          </div>
 
           <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
             Already have an account?{' '}

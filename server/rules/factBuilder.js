@@ -530,7 +530,156 @@ function buildFacts(familyData) {
   facts.couple_carrier_match = coupleCarrierMatch;
   facts.matching_carrier_condition = matchingCarrierCondition;
 
-  // 10. Pedigree Completeness
+  // 9b. X-Linked Recessive Transmission Pattern
+  let xLinkedConditionPresent = false;
+  let xLinkedCarrierMother = false;
+  let xLinkedAffectedGrandfather = false;
+  let xLinkedAffectedRelative = false;
+  let xLinkedRecessivePattern = false;
+
+  const xLinkedCodes = new Set();
+  conditions.forEach(c => {
+    const cond = c.conditionId || {};
+    const cat = cond.category || '';
+    const code = cond.code || '';
+    const name = (cond.name || '').toLowerCase();
+    if (cat === 'X_LINKED' || code === 'HEMA-F8' || name.includes('hemophilia') || name.includes('duchenne')) {
+      xLinkedCodes.add(code);
+      xLinkedConditionPresent = true;
+    }
+  });
+
+  if (xLinkedConditionPresent) {
+    if (maternalParentId && (carrierMemberIds.has(maternalParentId) || affectedMemberIds.has(maternalParentId))) {
+      xLinkedCarrierMother = true;
+    }
+
+    if (maternalParentId) {
+      (parentsOf[maternalParentId] || []).forEach(gpId => {
+        const gp = members.find(m => m._id.toString() === gpId);
+        if (gp && gp.sex === 'MALE' && affectedMemberIds.has(gpId)) {
+          xLinkedAffectedGrandfather = true;
+        }
+      });
+    }
+
+    extendedDirectRels.forEach(({ def, fromId, toId, baseType }) => {
+      const isGrandparent = baseType === 'GRANDPARENT' || def?.code?.includes('GRANDFATHER');
+      const isMaternal = def?.lineage === 'MATERNAL' || def?.code?.includes('MATERNAL');
+      if (isGrandparent && isMaternal) {
+        const gpId = def.direction === 'CHILD_TO_PARENT' ? toId : fromId;
+        const gp = members.find(m => m._id.toString() === gpId);
+        if (gp && gp.sex === 'MALE' && affectedMemberIds.has(gpId)) {
+          xLinkedAffectedGrandfather = true;
+        }
+      }
+    });
+
+    maternalLineIds.forEach(relId => {
+      const rel = members.find(m => m._id.toString() === relId);
+      if (rel && rel.sex === 'MALE' && affectedMemberIds.has(relId)) {
+        xLinkedAffectedRelative = true;
+      }
+    });
+
+    if (
+      (xLinkedCarrierMother && (xLinkedAffectedGrandfather || xLinkedAffectedRelative)) ||
+      (xLinkedCarrierMother && proband && proband.sex === 'MALE') ||
+      (xLinkedAffectedGrandfather && xLinkedCarrierMother) ||
+      (xLinkedAffectedGrandfather && proband && proband.sex === 'MALE') ||
+      (proband && proband.sex === 'MALE' && affectedMemberIds.has(proband._id.toString())) ||
+      (carrierMemberIds.size > 0 && affectedMemberIds.size > 0)
+    ) {
+      xLinkedRecessivePattern = true;
+    }
+  }
+
+  facts.x_linked_condition_present = xLinkedConditionPresent;
+  facts.x_linked_carrier_mother = xLinkedCarrierMother;
+  facts.x_linked_affected_grandfather = xLinkedAffectedGrandfather;
+  facts.x_linked_affected_relative = xLinkedAffectedRelative;
+  facts.x_linked_recessive_pattern = xLinkedRecessivePattern;
+
+  // 10. Parental Age & Aneuploidy Indicators
+  function calculateAge(dob) {
+    if (!dob) return null;
+    const d = new Date(dob);
+    if (isNaN(d.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  let maternalAgeOver35 = false;
+  let paternalAgeOver40 = false;
+  let maternalAge = null;
+  let paternalAge = null;
+
+  if (proband) {
+    const pId = proband._id.toString();
+    const probandAge = calculateAge(proband.dateOfBirth);
+    const pSpouseIds = spousesOf[pId] || [];
+    const partner = members.find(m => pSpouseIds.includes(m._id.toString()));
+    const partnerAge = partner ? calculateAge(partner.dateOfBirth) : null;
+
+    if (proband.sex === 'FEMALE') {
+      maternalAge = probandAge;
+      if (partner && partner.sex === 'MALE') paternalAge = partnerAge;
+    } else if (proband.sex === 'MALE') {
+      paternalAge = probandAge;
+      if (partner && partner.sex === 'FEMALE') maternalAge = partnerAge;
+    }
+  }
+
+  if (maternalAge !== null && maternalAge >= 35) {
+    maternalAgeOver35 = true;
+  }
+  if (paternalAge !== null && paternalAge >= 40) {
+    paternalAgeOver40 = true;
+  }
+
+  // Also inspect any defined couples if proband couple did not set both
+  couples.forEach(([m1Id, m2Id]) => {
+    const m1 = members.find(m => m._id.toString() === m1Id);
+    const m2 = members.find(m => m._id.toString() === m2Id);
+    [m1, m2].forEach(m => {
+      if (m && m.dateOfBirth) {
+        const age = calculateAge(m.dateOfBirth);
+        if (age !== null) {
+          if (m.sex === 'FEMALE' && age >= 35) maternalAgeOver35 = true;
+          if (m.sex === 'MALE' && age >= 40) paternalAgeOver40 = true;
+        }
+      }
+    });
+  });
+
+  facts.maternal_age = maternalAge;
+  facts.paternal_age = paternalAge;
+  facts.maternal_age_over_35 = maternalAgeOver35;
+  facts.advanced_maternal_age = maternalAgeOver35;
+  facts.paternal_age_over_40 = paternalAgeOver40;
+  facts.advanced_paternal_age = paternalAgeOver40;
+
+  // 11. Obstetric History & Recurrent Pregnancy Loss
+  const allNotes = [
+    family?.description || '',
+    ...members.map(m => m.notes || ''),
+    ...conditions.map(c => c.notes || '')
+  ].join(' ').toLowerCase();
+
+  const rplDetected = (
+    allNotes.includes('pregnancy loss') ||
+    allNotes.includes('miscarriage') ||
+    allNotes.includes('recurrent loss') ||
+    allNotes.includes('habitual abortion')
+  );
+  facts.recurrent_pregnancy_loss = rplDetected;
+
+  // 12. Pedigree Completeness
   const isComplete = members.length >= 3 && Boolean(proband) && (facts.has_both_parents_recorded || couples.length > 0);
   facts.family_history_complete = isComplete;
   facts.required_family_information_missing = !isComplete;
